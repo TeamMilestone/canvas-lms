@@ -1,126 +1,650 @@
-<%
-# Copyright (C) 2011 - present Instructure, Inc.
-#
-# This file is part of Canvas.
-#
-# Canvas is free software: you can redistribute it and/or modify it under
-# the terms of the GNU Affero General Public License as published by the Free
-# Software Foundation, version 3 of the License.
-#
-# Canvas is distributed in the hope that it will be useful, but WITHOUT ANY
-# WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-# A PARTICULAR PURPOSE. See the GNU Affero General Public License for more
-# details.
-#
-# You should have received a copy of the GNU Affero General Public License along
-# with this program. If not, see <http://www.gnu.org/licenses/>.
-%>
+<html><head><meta http-equiv="content-type" content="text/html;charset=UTF-8">
 
-<%
-  if k5_user?
-    dashboard_title = t('Home')
-  else
-    dashboard_title = t('Dashboard')
-  end
-%>
 
-<% provide :page_title do %><%= dashboard_title %><% end %>
-<%
-  is_observer = @current_user&.roles(@domain_root_account)&.include?('observer')
-  if show_planner?
-    # fire off these `fetch` requests now so they are ready sooner
-    six_months_ago = CGI.escape Time.now.utc.at_beginning_of_day.months_ago(6).iso8601(3)
-    beginning_of_day = CGI.escape Time.zone.now.at_beginning_of_day.utc.iso8601(3)
-    beginning_of_week = CGI.escape Time.zone.now.beginning_of_week(:sunday).utc.iso8601(3)
-    end_of_week = CGI.escape Time.zone.now.end_of_week(:sunday).utc.iso8601(3)
-    next_year = CGI.escape Time.zone.now.utc.at_beginning_of_day.years_since(1).iso8601(3)
-    last_year = CGI.escape Time.zone.now.utc.at_beginning_of_day.years_ago(1).iso8601(3)
-    if !is_observer || @cards_prefetch_observed_param == @current_user.id
-      if k5_user?
-%>
-        <%if !Account.site_admin.feature_enabled?(:dashboard_graphql_integration) %>
-          <%= prefetch_xhr("/api/v1/dashboard/dashboard_cards") %>
-        <% end %>
-        <%= prefetch_xhr("/api/v1/planner/items?start_date=#{last_year}&order=asc&per_page=1") %>
-        <%= prefetch_xhr("/api/v1/planner/items?end_date=#{next_year}&order=desc&per_page=1") %>
-        <%= prefetch_xhr("/api/v1/planner/items?start_date=#{beginning_of_week}&end_date=#{end_of_week}&per_page=100") %>
-        <%= prefetch_xhr('/api/v1/users/self/missing_submissions?include%5B%5D=planner_overrides&filter%5B%5D=current_grading_period&filter%5B%5D=submittable&per_page=100') %>
-      <% else %>
-        <%if !Account.site_admin.feature_enabled?(:dashboard_graphql_integration) %>
-          <%= prefetch_xhr("/api/v1/dashboard/dashboard_cards") %>
-        <% end %>
-        <%= prefetch_xhr("/api/v1/planner/items?start_date=#{six_months_ago}&filter=new_activity&order=asc") %>
-        <%= prefetch_xhr("/api/v1/planner/items?end_date=#{beginning_of_day}&order=desc&per_page=1") %>
-        <%= prefetch_xhr("/api/v1/planner/items?start_date=#{beginning_of_day}") %>
-        <%= prefetch_xhr('/api/v1/users/self/missing_submissions?include%5B%5D=planner_overrides&filter%5B%5D=current_grading_period&filter%5B%5D=submittable') %>
-      <% end %>
-    <% else  #is_observer, self is not selected %>
-      <% observed_course_ids = @current_user.cached_course_ids_for_observed_user(@selected_observed_user)
-        .sort {|a, b| a <=> b }
-        .map {|cid|  "course_ids%5B%5D=#{cid}" }
-        .join('&')
+    <meta charset="utf-8">
+    <meta http-equiv="Cache-Control" content="31536000">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HY</title>
+    <!-- styles -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@500&amp;display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/common.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontSize: {
+                        h1: ['26px'],
+                        h2: ['18px'],
+                        h3: ['16px'],
+                    },
+                    fontFamily: {
+                        sans: ['Noto Sans KR', 'sans-serif'],
+                    },
+                    colors: {
+                        blue: '#0000C1',
+                        gray50: 'rgba(239, 244, 247, 0.5)',
+                        gray100: '#EFF4F7',
+                        gray200: 'rgba(173, 184, 192, 0.4)',
+                        gray300: '#ACB0B3',
+                        gray400: '#74787A',
+                        gray500: '#4B4D4E',
+                        gray600: '#171718',
+                        statusBlue: '#91BBFF',
+                        statusGreen: '#50E06F',
+                        statusYellow: '#FFE500',
+                        statusPink: '#FF8181',
+                        statusRed: '#FF0000',
+                    },
+                    backgroundImage: {
+                        'dashboard-gradient': 'radial-gradient(100% 2860.91% at 100% 100%, #0000C1 27%, #000277 100%)',
+                    },
+                    boxShadow: {
+                        'dashboard-shadow': '0px 4px 20px 0px rgba(0, 26, 255, 0.1)',
+                        'dashboard-shadow2': '0px 4px 20px 0px #001AFF1A',
+                        'gnb-shadow': '0 4px 20px 0 rgba(0,0,0,0.2)',
+                        'course-shadow': '0 4px 20px 0 rgba(0, 29, 179, 0.3)',
+                        'black-shadow25': '0 4px 20px 0 rgba(0,0,0,0.25)',
+                        'black-shadow': '0 4px 20px 0 rgba(0,0,0,0.14)',
+                    },
+                    backdropBlur: {
+                        30: '30px',
+                    },
+                }
+            }
+        }
+    </script>
+<style>*, ::before, ::after{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }::backdrop{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }/* ! tailwindcss v3.4.14 | MIT License | https://tailwindcss.com */*,::after,::before{box-sizing:border-box;border-width:0;border-style:solid;border-color:#e5e7eb}::after,::before{--tw-content:''}:host,html{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;tab-size:4;font-family:Noto Sans KR, sans-serif;font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent}body{margin:0;line-height:inherit}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;font-feature-settings:normal;font-variation-settings:normal;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}button,input,optgroup,select,textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;margin:0;padding:0}button,select{text-transform:none}button,input:where([type=button]),input:where([type=reset]),input:where([type=submit]){-webkit-appearance:button;background-color:transparent;background-image:none}:-moz-focusring{outline:auto}:-moz-ui-invalid{box-shadow:none}progress{vertical-align:baseline}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}blockquote,dd,dl,figure,h1,h2,h3,h4,h5,h6,hr,p,pre{margin:0}fieldset{margin:0;padding:0}legend{padding:0}menu,ol,ul{list-style:none;margin:0;padding:0}dialog{padding:0}textarea{resize:vertical}input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}[role=button],button{cursor:pointer}:disabled{cursor:default}audio,canvas,embed,iframe,img,object,svg,video{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}[hidden]:where(:not([hidden=until-found])){display:none}.fixed{position:fixed}.absolute{position:absolute}.relative{position:relative}.sticky{position:sticky}.bottom-0{bottom:0px}.left-0{left:0px}.right-0{right:0px}.right-\[20px\]{right:20px}.top-0{top:0px}.top-\[24px\]{top:24px}.top-\[40px\]{top:40px}.z-\[1000\]{z-index:1000}.mx-auto{margin-left:auto;margin-right:auto}.mb-\[6px\]{margin-bottom:6px}.ml-\[4px\]{margin-left:4px}.ml-\[60px\]{margin-left:60px}.mt-\[3px\]{margin-top:3px}.line-clamp-2{overflow:hidden;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2}.block{display:block}.flex{display:flex}.inline-flex{display:inline-flex}.grid{display:grid}.hidden{display:none}.h-\[100px\]{height:100px}.h-\[12px\]{height:12px}.h-\[200px\]{height:200px}.h-\[20px\]{height:20px}.h-\[21px\]{height:21px}.h-\[220px\]{height:220px}.h-\[236px\]{height:236px}.h-\[252px\]{height:252px}.h-\[26px\]{height:26px}.h-\[280px\]{height:280px}.h-\[326px\]{height:326px}.h-\[328px\]{height:328px}.h-\[32px\]{height:32px}.h-\[34px\]{height:34px}.h-\[40px\]{height:40px}.h-\[60px\]{height:60px}.h-full{height:100%}.min-h-screen{min-height:100vh}.w-\[100px\]{width:100px}.w-\[112px\]{width:112px}.w-\[12px\]{width:12px}.w-\[130px\]{width:130px}.w-\[21px\]{width:21px}.w-\[23px\]{width:23px}.w-\[240px\]{width:240px}.w-\[26px\]{width:26px}.w-\[320px\]{width:320px}.w-\[340px\]{width:340px}.w-\[34px\]{width:34px}.w-\[40px\]{width:40px}.w-\[60px\]{width:60px}.w-full{width:100%}.min-w-\[80px\]{min-width:80px}.max-w-\[1440px\]{max-width:1440px}.max-w-\[170px\]{max-width:170px}.max-w-\[180px\]{max-width:180px}.max-w-\[200px\]{max-width:200px}.max-w-\[340px\]{max-width:340px}.max-w-\[95px\]{max-width:95px}.max-w-\[980px\]{max-width:980px}.flex-1{flex:1 1 0%}.shrink-0{flex-shrink:0}.flex-grow{flex-grow:1}.flex-grow-0{flex-grow:0}.cursor-pointer{cursor:pointer}.grid-cols-3{grid-template-columns:repeat(3, minmax(0, 1fr))}.grid-cols-4{grid-template-columns:repeat(4, minmax(0, 1fr))}.flex-col{flex-direction:column}.items-start{align-items:flex-start}.items-center{align-items:center}.justify-center{justify-content:center}.justify-between{justify-content:space-between}.justify-around{justify-content:space-around}.gap-\[10px\]{gap:10px}.gap-\[2px\]{gap:2px}.gap-\[30px\]{gap:30px}.gap-\[40px\]{gap:40px}.gap-\[4px\]{gap:4px}.gap-\[6px\]{gap:6px}.gap-y-\[16px\]{row-gap:16px}.overflow-auto{overflow:auto}.overflow-y-auto{overflow-y:auto}.overflow-y-hidden{overflow-y:hidden}.truncate{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.rounded-\[100px\]{border-radius:100px}.rounded-\[10px\]{border-radius:10px}.rounded-\[12px\]{border-radius:12px}.rounded-\[16px\]{border-radius:16px}.rounded-\[17px\]{border-radius:17px}.rounded-\[20px\]{border-radius:20px}.rounded-\[26px\]{border-radius:26px}.rounded-\[3px\]{border-radius:3px}.rounded-\[40px\]{border-radius:40px}.rounded-\[4px\]{border-radius:4px}.rounded-\[60px\]{border-radius:60px}.rounded-full{border-radius:9999px}.rounded-t-\[20px\]{border-top-left-radius:20px;border-top-right-radius:20px}.rounded-bl-\[10px\]{border-bottom-left-radius:10px}.rounded-bl-\[20px\]{border-bottom-left-radius:20px}.rounded-br-\[10px\]{border-bottom-right-radius:10px}.rounded-br-\[20px\]{border-bottom-right-radius:20px}.rounded-tl-\[10px\]{border-top-left-radius:10px}.rounded-tl-\[20px\]{border-top-left-radius:20px}.rounded-tr-\[10px\]{border-top-right-radius:10px}.rounded-tr-\[20px\]{border-top-right-radius:20px}.border-gray-200{--tw-border-opacity:1;border-color:rgb(229 231 235 / var(--tw-border-opacity))}.bg-\[\#0000C1\]{--tw-bg-opacity:1;background-color:rgb(0 0 193 / var(--tw-bg-opacity))}.bg-\[\#003EA2\]{--tw-bg-opacity:1;background-color:rgb(0 62 162 / var(--tw-bg-opacity))}.bg-\[\#0C69FF\]{--tw-bg-opacity:1;background-color:rgb(12 105 255 / var(--tw-bg-opacity))}.bg-\[\#EFF4F7\]{--tw-bg-opacity:1;background-color:rgb(239 244 247 / var(--tw-bg-opacity))}.bg-\[rgba\(172\2c 176\2c 179\2c 0\.2\)\]{background-color:rgba(172,176,179,0.2)}.bg-\[rgba\(255\2c 255\2c 255\2c 0\.7\)\]{background-color:rgba(255,255,255,0.7)}.bg-blue{--tw-bg-opacity:1;background-color:rgb(0 0 193 / var(--tw-bg-opacity))}.bg-gray-300{--tw-bg-opacity:1;background-color:rgb(209 213 219 / var(--tw-bg-opacity))}.bg-gray100{--tw-bg-opacity:1;background-color:rgb(239 244 247 / var(--tw-bg-opacity))}.bg-gray200{background-color:rgba(173, 184, 192, 0.4)}.bg-gray300{--tw-bg-opacity:1;background-color:rgb(172 176 179 / var(--tw-bg-opacity))}.bg-gray400{--tw-bg-opacity:1;background-color:rgb(116 120 122 / var(--tw-bg-opacity))}.bg-transparent{background-color:transparent}.bg-white{--tw-bg-opacity:1;background-color:rgb(255 255 255 / var(--tw-bg-opacity))}.bg-dashboard-gradient{background-image:radial-gradient(100% 2860.91% at 100% 100%, #0000C1 27%, #000277 100%)}.p-\[10px\]{padding:10px}.p-\[2px\]{padding:2px}.px-\[0px\]{padding-left:0px;padding-right:0px}.px-\[10px\]{padding-left:10px;padding-right:10px}.px-\[11px\]{padding-left:11px;padding-right:11px}.px-\[12px\]{padding-left:12px;padding-right:12px}.px-\[20px\]{padding-left:20px;padding-right:20px}.px-\[35px\]{padding-left:35px;padding-right:35px}.px-\[40px\]{padding-left:40px;padding-right:40px}.px-\[8px\]{padding-left:8px;padding-right:8px}.py-\[10px\]{padding-top:10px;padding-bottom:10px}.py-\[16px\]{padding-top:16px;padding-bottom:16px}.py-\[18px\]{padding-top:18px;padding-bottom:18px}.py-\[6px\]{padding-top:6px;padding-bottom:6px}.pb-0{padding-bottom:0px}.pb-\[10px\]{padding-bottom:10px}.pb-\[14px\]{padding-bottom:14px}.pb-\[6px\]{padding-bottom:6px}.pl-\[10px\]{padding-left:10px}.pl-\[16px\]{padding-left:16px}.pr-\[10px\]{padding-right:10px}.pr-\[6px\]{padding-right:6px}.pt-\[10px\]{padding-top:10px}.pt-\[14px\]{padding-top:14px}.pt-\[20px\]{padding-top:20px}.pt-\[2px\]{padding-top:2px}.pt-\[30px\]{padding-top:30px}.pt-\[4px\]{padding-top:4px}.pt-\[6px\]{padding-top:6px}.text-center{text-align:center}.text-\[10px\]{font-size:10px}.text-\[12px\]{font-size:12px}.text-\[13px\]{font-size:13px}.text-\[14px\]{font-size:14px}.text-\[16px\]{font-size:16px}.text-\[26px\]{font-size:26px}.text-\[8px\]{font-size:8px}.text-h2{font-size:18px}.text-sm{font-size:0.875rem;line-height:1.25rem}.font-medium{font-weight:500}.font-semibold{font-weight:600}.capitalize{text-transform:capitalize}.leading-\[15px\]{line-height:15px}.leading-\[16px\]{line-height:16px}.leading-\[18px\]{line-height:18px}.leading-\[20px\]{line-height:20px}.leading-\[24px\]{line-height:24px}.leading-\[30px\]{line-height:30px}.leading-\[50px\]{line-height:50px}.leading-\[60px\]{line-height:60px}.leading-none{line-height:1}.leading-normal{line-height:1.5}.text-\[\#00BA60\]{--tw-text-opacity:1;color:rgb(0 186 96 / var(--tw-text-opacity))}.text-\[\#1384D7\]{--tw-text-opacity:1;color:rgb(19 132 215 / var(--tw-text-opacity))}.text-\[\#171718\]{--tw-text-opacity:1;color:rgb(23 23 24 / var(--tw-text-opacity))}.text-\[\#4B4D4E\]{--tw-text-opacity:1;color:rgb(75 77 78 / var(--tw-text-opacity))}.text-\[\#6767FF\]{--tw-text-opacity:1;color:rgb(103 103 255 / var(--tw-text-opacity))}.text-\[\#7B7E80\]{--tw-text-opacity:1;color:rgb(123 126 128 / var(--tw-text-opacity))}.text-\[\#DBE4F2\]{--tw-text-opacity:1;color:rgb(219 228 242 / var(--tw-text-opacity))}.text-\[\#FF8A00\]{--tw-text-opacity:1;color:rgb(255 138 0 / var(--tw-text-opacity))}.text-gray-500{--tw-text-opacity:1;color:rgb(107 114 128 / var(--tw-text-opacity))}.text-gray-600{--tw-text-opacity:1;color:rgb(75 85 99 / var(--tw-text-opacity))}.text-gray400{--tw-text-opacity:1;color:rgb(116 120 122 / var(--tw-text-opacity))}.text-gray500{--tw-text-opacity:1;color:rgb(75 77 78 / var(--tw-text-opacity))}.text-gray600{--tw-text-opacity:1;color:rgb(23 23 24 / var(--tw-text-opacity))}.text-white{--tw-text-opacity:1;color:rgb(255 255 255 / var(--tw-text-opacity))}.placeholder-gray400::placeholder{--tw-placeholder-opacity:1;color:rgb(116 120 122 / var(--tw-placeholder-opacity))}.shadow-dashboard-shadow{--tw-shadow:0px 4px 20px 0px rgba(0, 26, 255, 0.1);--tw-shadow-colored:0px 4px 20px 0px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-dashboard-shadow2{--tw-shadow:0px 4px 20px 0px #001AFF1A;--tw-shadow-colored:0px 4px 20px 0px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-gnb-shadow{--tw-shadow:0 4px 20px 0 rgba(0,0,0,0.2);--tw-shadow-colored:0 4px 20px 0 var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.backdrop-blur-30{--tw-backdrop-blur:blur(30px);-webkit-backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia)}.hover\:bg-gray-200:hover{--tw-bg-opacity:1;background-color:rgb(229 231 235 / var(--tw-bg-opacity))}.focus\:outline-none:focus{outline:2px solid transparent;outline-offset:2px}@media (min-width: 768px){.md\:flex{display:flex}.md\:hidden{display:none}.md\:h-\[53px\]{height:53px}.md\:w-\[140px\]{width:140px}.md\:px-\[40px\]{padding-left:40px;padding-right:40px}}@media (min-width: 1024px){.lg\:block{display:block}.lg\:flex{display:flex}}</style></head>
 
-if k5_user?
-      %>
-        <%if !Account.site_admin.feature_enabled?(:dashboard_graphql_integration) %>
-          <%= prefetch_xhr("/api/v1/dashboard/dashboard_cards?observed_user_id=#{@cards_prefetch_observed_param}") %>
-        <% end %>
-        <%= prefetch_xhr("/api/v1/planner/items?start_date=#{last_year}&include%5B%5D=account_calendars&include%5B%5D=all_courses&order=asc&per_page=1&observed_user_id=#{@cards_prefetch_observed_param}") %>
-        <%= prefetch_xhr("/api/v1/planner/items?end_date=#{next_year}&include%5B%5D=account_calendars&include%5B%5D=all_courses&order=desc&per_page=1&observed_user_id=#{@cards_prefetch_observed_param}") %>
-        <%= prefetch_xhr("/api/v1/planner/items?start_date=#{beginning_of_week}&end_date=#{end_of_week}&include%5B%5D=account_calendars&include%5B%5D=all_courses&per_page=100&observed_user_id=#{@cards_prefetch_observed_param}") %>
-        <%= prefetch_xhr("/api/v1/users/self/missing_submissions?include%5B%5D=planner_overrides&filter%5B%5D=current_grading_period&filter%5B%5D=submittable&per_page=100&observed_user_id=#{@cards_prefetch_observed_param}&#{observed_course_ids}") %>
-      <% else %>
-        <%if !Account.site_admin.feature_enabled?(:dashboard_graphql_integration) %>
-          <%= prefetch_xhr("/api/v1/dashboard/dashboard_cards?observed_user_id=#{@cards_prefetch_observed_param}") %>
-        <% end %>
-        <%= prefetch_xhr("/api/v1/planner/items?start_date=#{six_months_ago}&include%5B%5D=account_calendars&include%5B%5D=all_courses&filter=new_activity&order=asc&observed_user_id=#{@cards_prefetch_observed_param}") %>
-        <%= prefetch_xhr("/api/v1/planner/items?end_date=#{beginning_of_day}&include%5B%5D=account_calendars&include%5B%5D=all_courses&order=desc&per_page=1&observed_user_id=#{@cards_prefetch_observed_param}") %>
-        <%= prefetch_xhr("/api/v1/planner/items?start_date=#{beginning_of_day}&include%5B%5D=account_calendars&include%5B%5D=all_courses&observed_user_id=#{@cards_prefetch_observed_param}") %>
-        <%= prefetch_xhr("/api/v1/users/self/missing_submissions?include%5B%5D=planner_overrides&filter%5B%5D=current_grading_period&filter%5B%5D=submittable&observed_user_id=#{@cards_prefetch_observed_param}&#{observed_course_ids}") %>
-      <% end %>
-    <% end%>
-  <% end %>
+<body>
+    <!-- pc Header -->
+    <header class="sticky top-0 backdrop-blur-30 z-[1000] bg-[rgba(255,255,255,0.7)]">
+        <div class="flex items-center justify-between px-[40px] py-[10px] max-w-[1440px] mx-auto">
+            <div class="flex items-center">
+                <h1>
+                    <a class="block" href="/"><img src="./images/logo.svg" alt="한양대학교" class="block w-[100px] h-[34px] md:w-[140px] md:h-[53px]"></a>
+                </h1>
+                <div class="hidden lg:flex items-center w-[130px] h-[34px] rounded-[17px] px-[11px] bg-[rgba(172,176,179,0.2)] ml-[60px]">
+                    <button class="shrink-0 w-[26px]"><img src="./images/gnb/icon_search.svg" alt="search" class="w-[26px] h-[26px]"></button>
+                    <input type="text" class="w-full ml-[4px] focus:outline-none bg-transparent placeholder-gray400" placeholder="Search">
+                </div>
+            </div>
+            <div class="hidden md:flex justify-between gap-[40px] items-center">
+                <div class="flex gap-[30px]">
+                    <div class="relative flex items-center">
+                        <button class="rounded-full hover:bg-gray-200 focus:outline-none"><img src="./images/gnb/icon_chat.svg" alt="chat"></button>
 
-<% provide :right_side do %>
-  <% if !show_planner? and !k5_user? %>
-    <div class="placeholder"></div>
-  <% end %>
-<% end %>
+                        <!-- messages -->
+                        <div class="hidden absolute top-[40px] right-0">
+                            <div class="bg-white rounded-[20px] shadow-gnb-shadow p-[10px]">
+                                <div class="flex justify-between items-center pb-[10px] px-[10px]">
+                                    <strong class="text-[16px] leading-[20px] text-gray-600">Messages</strong><img src="./images/gnb/icon_more.svg" alt="" class="w-[12px] h-[12px]">
+                                </div>
 
-<div id="dashboard" class="ic-dashboard-app">
-  <h1 class="screenreader-only"><%= dashboard_title %></h1>
-  <%= render :partial => 'shared/dashboard_invitation', :collection => @pending_invitations %>
-  <%= render :partial => 'shared/dashboard_messages' %>
-  <% if k5_user? %>
-    <div id="dashboard-app-container"></div>
-  <% else %>
-    <% if Account.site_admin.feature_enabled?(:instui_header) 
-      dashboard_header_container_props = {
-        startNewCourseVisible: show_user_create_course_button(@current_user) || (@current_user.alternate_account_for_course_creation && @domain_root_account.feature_enabled?(:create_course_subaccount_picker)),
-        viewGradesUrl: grades_path,
-      }
-    %>
-      <%if dashboard_header_container_props[:startNewCourseVisible] %>
-        <% if @domain_root_account.feature_enabled?(:create_course_subaccount_picker) %>
-          <div id="create_course_modal_container"></div>
-        <% else %>
-          <%= render :partial => 'shared/new_course_form' %>
-        <% end %>
-      <% end %>
-    <% end %>
+                                <div class="w-[340px]">
+                                    <div class="pb-[10px] max-w-[180px] mx-auto">
+                                        <ul class="flex bg-gray200 p-[2px] rounded-[3px] min-w-[80px]">
+                                            <li class="flex-grow flex-1 shrink-0 text-center font-medium rounded-[3px] cursor-pointer flex items-center justify-center bg-[#EFF4F7] text-[#171718] text-[10px] h-[20px]">
+                                                <span class="mt-[3px]">All</span>
+                                            </li>
+                                            <li class="flex-grow flex-1 shrink-0 text-center font-medium rounded-[3px] cursor-pointer flex items-center justify-center text-gray400 text-[10px] h-[20px]">
+                                                <span class="mt-[3px]">Unread</span>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    <div class="h-[328px] overflow-auto">
+                                        <div class="px-[10px] py-[6px] rounded-[10px]">
+                                            <div class="flex justify-between items-center">
+                                                <span class="flex items-center gap-[4px]"><img src="./images/apps/icon_slack.svg" alt="" class="w-[12px]"><span class="text-[10px] leading-[15px] text-gray600">slack</span></span>
+                                                <span class="text-[10px] text-gray500">3:40PM</span>
+                                            </div>
+                                            <div class="pt-[4px] pl-[16px]">
+                                                <strong class="block truncate text-[12px] leading-[18px] text-gray600 font-medium">Meredith
+                                                    Brown</strong>
+                                                <p class="block truncate text-[10px] leading-[15px] text-gray500">Really
+                                                    need to give some Kudos to @you for helping..</p>
+                                            </div>
+                                        </div>
+                                        <div class="px-[10px] py-[6px] rounded-[10px]">
+                                            <div class="flex justify-between items-center">
+                                                <span class="flex items-center gap-[4px]"><img src="./images/apps/icon_zoom.svg" alt="" class="w-[12px]"><span class="text-[10px] leading-[15px] text-gray600">zoom</span></span>
+                                                <span class="text-[10px] text-gray500">3:40PM</span>
+                                            </div>
+                                            <div class="pt-[4px] pl-[16px]">
+                                                <div class="flex items-center gap-[6px]">
+                                                    <div class="w-[26px] h-[26px] rounded-[26px] bg-gray-300">
+                                                        A
+                                                    </div>
+                                                    <div class="flex flex-col flex-grow">
+                                                        <strong class="truncate text-[12px] leading-[18px] text-gray600 font-medium">Meredith
+                                                            Brown</strong>
+                                                        <p class="truncate text-[10px] leading-[15px] text-gray500">
+                                                            Really need to give some Kudos to @you for helping..
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="px-[10px] py-[6px] rounded-[10px]">
+                                            <div class="flex justify-between items-center">
+                                                <span class="flex items-center gap-[4px]"><img src="./images/apps/icon_slack.svg" alt="" class="w-[12px]"><span class="text-[10px] leading-[15px] text-gray600">slack</span></span>
+                                                <span class="text-[10px] text-gray500">3:40PM</span>
+                                            </div>
+                                            <div class="pt-[4px] pl-[16px]">
+                                                <strong class="block truncate text-[12px] leading-[18px] text-gray600 font-medium">Meredith
+                                                    Brown</strong>
+                                                <p class="block truncate text-[10px] leading-[15px] text-gray500">Really
+                                                    need to give some Kudos to @you for helping..</p>
+                                            </div>
+                                        </div>
+                                        <div class="px-[10px] py-[6px] rounded-[10px]">
+                                            <div class="flex justify-between items-center">
+                                                <span class="flex items-center gap-[4px]"><img src="./images/apps/icon_zoom.svg" alt="" class="w-[12px]"><span class="text-[10px] leading-[15px] text-gray600">zoom</span></span>
+                                                <span class="text-[10px] text-gray500">3:40PM</span>
+                                            </div>
+                                            <div class="pt-[4px] pl-[16px]">
+                                                <div class="flex items-center gap-[6px]">
+                                                    <div class="w-[26px] h-[26px] rounded-[26px] bg-gray-300">
+                                                        A
+                                                    </div>
+                                                    <div class="flex flex-col flex-grow">
+                                                        <strong class="truncate text-[12px] leading-[18px] text-gray600 font-medium">Meredith
+                                                            Brown</strong>
+                                                        <p class="truncate text-[10px] leading-[15px] text-gray500">
+                                                            Really need to give some Kudos to @you for helping..
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- // messages -->
+                    </div>
+                    <div class="relative flex items-center">
+                        <button class="rounded-full hover:bg-gray-200 focus:outline-none">
+                            <img src="./images/gnb/icon_notification.svg" alt="notification">
+                        </button>
 
-    <div id="dashboard_header_container" class="ic-Dashboard-header" data-props="<%=dashboard_header_container_props.to_json%>"></div>
-    <% if planner_enabled? %>
-      <div id="dashboard-planner" class="StudentPlanner__Container" style="display: <%= show_planner? ? 'block' : 'none' %>"></div>
-    <% end %>
-    <div
-      id="dashboard-activity"
-      class="ic-Dashboard-Activity"
-      style="display: <%= show_recent_activity? ? 'block' : 'none' %>"
-    >
-      <!-- this will be populated via xhr from UsersController::dashboard_stream_items when someone selects the stream-items dashboard option -->
+                        <!-- Notifications -->
+                        <div class="hidden absolute top-[40px] right-0">
+                            <div class="bg-white rounded-[20px] shadow-gnb-shadow p-[10px]">
+                                <div class="flex justify-between items-center pb-[10px] px-[10px]">
+                                    <strong class="text-[16px] leading-[20px] text-gray-600">Notifications</strong><img src="./images/gnb/icon_more.svg" alt="" class="w-[12px] h-[12px]">
+                                </div>
+
+                                <div class="w-[340px]">
+                                    <div class="pb-[10px] max-w-[180px] mx-auto">
+                                        <ul class="flex bg-gray200 p-[2px] rounded-[3px] min-w-[80px]">
+                                            <li class="flex-grow flex-1 shrink-0 text-center font-medium rounded-[3px] cursor-pointer flex items-center justify-center bg-[#EFF4F7] text-[#171718] text-[10px] h-[20px]">
+                                                <span class="mt-[3px]">All</span>
+                                            </li>
+                                            <li class="flex-grow flex-1 shrink-0 text-center font-medium rounded-[3px] cursor-pointer flex items-center justify-center text-gray400 text-[10px] h-[20px]">
+                                                <span class="mt-[3px]">Unread</span>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    <div class="h-[326px] overflow-auto">
+                                        <div class="p-[10px] pt-[6px] rounded-[10px]">
+                                            <div class="flex gap-[6px] items-start">
+                                                <img src="./images/apps/icon_notification.svg" alt="" class="w-[34px]">
+                                                <div class="flex flex-col flex-grow">
+                                                    <div class="flex justify-between items-center">
+                                                        <strong class="truncate max-w-[200px] text-[12px] leading-[18px] text-gray600 font-medium">group
+                                                            join Request</strong><span class="text-[10px] text-gray500">3:42PM</span>
+                                                    </div>
+                                                    <p class="pt-[2px] text-[10px] leading-[15px] text-gray500">Alison
+                                                        request to join the Research Group. Please response the request
+                                                        within 72 hours.</p>
+                                                </div>
+                                            </div>
+                                            <div class="flex pt-[10px] gap-[6px] justify-center">
+                                                <button type="button" class="btn-primary small max-w-[95px]">Approve</button><button type="button" class="btn-secondary small max-w-[95px]">Deny</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!--// Notifications -->
+                    </div>
+                    <div class="relative flex items-center">
+                        <button class="w-[26px] h-[26px] rounded-full hover:bg-gray-200 focus:outline-none"><img src="./images/gnb/icon_calendar.svg" alt="calendar"></button>
+
+                        <!-- Calendar -->
+                        <div class="hidden absolute top-[40px] right-0">
+                            <div class="bg-white rounded-[20px] shadow-gnb-shadow p-[10px]">
+                                <div class="flex justify-between items-center pb-[10px] px-[10px]"><strong class="text-[16px] leading-[20px] text-gray-600">September 24-30,
+                                        2024</strong><img src="./images/gnb/icon_more.svg" alt="" class="w-[12px] h-[12px]">
+                                </div>
+                                <div class="w-[320px]">
+                                    <div class="py-[16px] px-[10px]">
+                                        <ul class="flex bg-gray200 p-[2px] rounded-[3px] min-w-[80px]">
+                                            <li class="flex-grow flex-1 shrink-0 text-center font-medium rounded-[3px] cursor-pointer flex items-center justify-center bg-[#EFF4F7] text-[#171718] text-[10px] h-[20px]">
+                                                <span class="mt-[3px]">All</span>
+                                            </li>
+                                            <li class="flex-grow flex-1 shrink-0 text-center font-medium rounded-[3px] cursor-pointer flex items-center justify-center text-gray400 text-[10px] h-[20px]">
+                                                <span class="mt-[3px]">Individual</span>
+                                            </li>
+                                            <li class="flex-grow flex-1 shrink-0 text-center font-medium rounded-[3px] cursor-pointer flex items-center justify-center text-gray400 text-[10px] h-[20px]">
+                                                <span class="mt-[3px]">Academic</span>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    <div class="h-[252px] overflow-auto">
+                                        <div class="flex items-start border-gray-200 rounded-[10px] p-[10px]">
+                                            <span class="flex flex-col items-center pr-[10px]"><img src="./images/lesson/icon_discussion.svg" alt="discussion" class="w-[40px]"><span class="pt-[2px] capitalize text-[#6767FF] text-[8px]">discussion</span></span>
+                                            <div class="flex flex-col flex-grow pr-[6px]">
+                                                <div class="flex justify-between pb-[6px] items-center">
+                                                    <strong class="truncate max-w-[170px] text-[12px] leading-[16px] text-gray600">Graphic
+                                                        Fundamentals</strong>
+                                                    <span class="rounded-[16px] bg-gray400 text-white font-medium text-[8px] leading-[16px] px-[8px]">Course</span>
+                                                </div>
+                                                <div class="flex flex-col gap-[6px]">
+                                                    <div class="flex gap-[2px] items-center"><img src="./images/common/icon_time.svg" alt="" class="w-[12px] h-[12px]"><span class="text-[12px] leading-none font-medium text-gray400">Sep
+                                                            25, 11:00AM</span></div>
+                                                    <div class="flex gap-[2px] items-center"><img src="./images/common/icon_location.svg" alt="" class="w-[12px] h-[12px]"><span class="text-[12px] leading-none font-medium text-gray400">Design
+                                                            Studio B</span></div>
+                                                </div>
+                                            </div>
+                                            <button type="button" class="w-[12px]"><img src="./images/dashboard/icon_calendar_alert_close.svg" alt="close"></button>
+                                        </div>
+                                        <div class="flex items-start border-gray-200 rounded-[10px] p-[10px]">
+                                            <span class="flex flex-col items-center pr-[10px]"><img src="./images/lesson/icon_project.svg" alt="project" class="w-[40px]"><span class="pt-[2px] capitalize text-[#00BA60] text-[8px]">project</span></span>
+                                            <div class="flex flex-col flex-grow pr-[6px]">
+                                                <div class="flex justify-between pb-[6px] items-center">
+                                                    <strong class="truncate max-w-[170px] text-[12px] leading-[16px] text-gray600">Graphic
+                                                        Fundamentals</strong>
+                                                    <span class="rounded-[16px] bg-gray400 text-white font-medium text-[8px] leading-[16px] px-[8px]">Personal</span>
+                                                </div>
+                                                <div class="flex flex-col gap-[6px]">
+                                                    <div class="flex gap-[2px] items-center"><img src="./images/common/icon_time.svg" alt="" class="w-[12px] h-[12px]"><span class="text-[12px] leading-none font-medium text-gray400">Sep
+                                                            25, 11:00AM</span></div>
+                                                    <div class="flex gap-[2px] items-center"><img src="./images/common/icon_location.svg" alt="" class="w-[12px] h-[12px]"><span class="text-[12px] leading-none font-medium text-gray400">Design
+                                                            Studio B</span></div>
+                                                </div>
+                                            </div>
+                                            <button type="button" class="w-[12px]"><img src="./images/dashboard/icon_calendar_alert_close.svg" alt="close"></button>
+                                        </div>
+                                        <div class="flex items-start border-gray-200 rounded-[10px] p-[10px]">
+                                            <span class="flex flex-col items-center pr-[10px]"><img src="./images/lesson/icon_feedback.svg" alt="feedback" class="w-[40px]"><span class="pt-[2px] capitalize text-[#FF8A00] text-[8px]">feedback</span></span>
+                                            <div class="flex flex-col flex-grow pr-[6px]">
+                                                <div class="flex justify-between pb-[6px] items-center">
+                                                    <strong class="truncate max-w-[170px] text-[12px] leading-[16px] text-gray600">Graphic
+                                                        Fundamentals</strong>
+                                                    <span class="rounded-[16px] bg-gray400 text-white font-medium text-[8px] leading-[16px] px-[8px]">Personal</span>
+                                                </div>
+                                                <div class="flex flex-col gap-[6px]">
+                                                    <div class="flex gap-[2px] items-center"><span class="text-[12px] leading-none font-medium text-gray400">User
+                                                            Experience Reserch</span></div>
+                                                    <div class="flex gap-[2px] items-center"><img src="./images/common/icon_check.svg" alt="" class="w-[12px] h-[12px]"><span class="text-[12px] leading-none font-medium text-gray400">8
+                                                            out of 100</span></div>
+                                                </div>
+                                            </div>
+                                            <button type="button" class="w-[12px]"><img src="./images/dashboard/icon_calendar_alert_close.svg" alt="close"></button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!--// Calendar -->
+                    </div>
+                    <div class="relative flex items-center">
+                        <button class="rounded-full hover:bg-gray-200 focus:outline-none"><img src="./images/gnb/icon_apps.svg" alt="menu"></button>
+
+                        <!-- menu -->
+                        <div class="hidden absolute top-[40px] right-0">
+                            <div class="bg-white rounded-[20px] shadow-gnb-shadow p-[10px]">
+                                <div class="flex justify-between items-center pb-[10px] px-[10px]"><strong class="text-[16px] leading-[20px] text-gray-600">Shortcut</strong><img src="./images/gnb/icon_more.svg" alt="" class="w-[12px] h-[12px]"></div>
+                                <div class="w-[240px] py-[6px]">
+                                    <ul class="grid grid-cols-3 gap-y-[16px]">
+                                        <li>
+                                            <a target="_blank" class="flex flex-col text-center gap-[4px]" href=""><img src="./images/apps/icon_courses.svg" alt="" class="w-[34px] mx-auto"><span class="font-medium text-gray500 text-[10px] truncate">Courses</span></a>
+                                        </li>
+                                        <li>
+                                            <a target="_blank" class="flex flex-col text-center gap-[4px]" href="">
+                                                <img src="./images/apps/icon_personal_group.svg" alt="" class="w-[34px] mx-auto"><span class="font-medium text-gray500 text-[10px] truncate">Personal
+                                                    Group</span>
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a target="_blank" class="flex flex-col text-center gap-[4px]" href="">
+                                                <img src="./images/apps/icon_minerva_uni.svg" alt="" class="w-[34px] mx-auto"><span class="font-medium text-gray500 text-[10px] truncate">Minerva
+                                                    Uni</span>
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a target="_blank" class="flex flex-col text-center gap-[4px]" href="">
+                                                <img src="./images/apps/icon_meeting_hub.svg" alt="" class="w-[34px] mx-auto"><span class="font-medium text-gray500 text-[10px] truncate">Meeting
+                                                    Hub</span>
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a target="_blank" class="flex flex-col text-center gap-[4px]" href=""><img src="./images/apps/icon_webinar.svg" alt="" class="w-[34px] mx-auto"><span class="font-medium text-gray500 text-[10px] truncate">Webinar</span></a>
+                                        </li>
+                                        <li>
+                                            <a target="_blank" class="flex flex-col text-center gap-[4px]" href=""><img src="./images/apps/icon_calendar.svg" alt="" class="w-[34px] mx-auto"><span class="font-medium text-gray500 text-[10px] truncate">Calendar</span></a>
+                                        </li>
+                                        <li>
+                                            <a target="_blank" class="flex flex-col text-center gap-[4px]" href=""><img src="./images/apps/icon_panopto.svg" alt="" class="w-[34px] mx-auto"><span class="font-medium text-gray500 text-[10px] truncate">Panopto</span></a>
+                                        </li>
+                                        <li>
+                                            <a target="_blank" class="flex flex-col text-center gap-[4px]" href=""><img src="./images/apps/icon_slack.svg" alt="" class="w-[34px] mx-auto"><span class="font-medium text-gray500 text-[10px] truncate">Slack</span></a>
+                                        </li>
+                                        <li>
+                                            <a target="_blank" class="flex flex-col text-center gap-[4px]" href=""><img src="./images/apps/icon_zoom.svg" alt="" class="w-[34px] mx-auto"><span class="font-medium text-gray500 text-[10px] truncate">Zoom</span></a>
+                                        </li>
+                                        <li>
+                                            <a target="_blank" class="flex flex-col text-center gap-[4px]" href="">
+                                                <img src="./images/apps/icon_learning_journal.svg" alt="" class="w-[34px] mx-auto"><span class="font-medium text-gray500 text-[10px] truncate">Learning
+                                                    Journal</span>
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a target="_blank" class="flex flex-col text-center gap-[4px]" href=""><img src="./images/apps/icon_help.svg" alt="" class="w-[34px] mx-auto"><span class="font-medium text-gray500 text-[10px] truncate">Help</span></a>
+                                        </li>
+                                        <li>
+                                            <a target="_blank" class="flex flex-col text-center gap-[4px]" href=""><img src="./images/apps/icon_setting.svg" alt="" class="w-[34px] mx-auto"><span class="font-medium text-gray500 text-[10px] truncate">Setting</span></a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- //menu -->
+                    </div>
+                    <div class="relative flex items-center">
+                        <button class="w-[26px] h-[26px] rounded-full hover:bg-gray-200 focus:outline-none"><img src="./images/gnb/icon_support.svg" alt="support"></button>
+                    </div>
+                </div>
+                <div>
+                    <button type="button" class="flex">
+                        <div class="w-[60px] h-[60px] rounded-[60px] bg-gray-300">A</div>
+                        <div class="flex flex-col w-[112px] items-start pl-[10px] text-[#4B4D4E]">
+                            <h2 class="truncate text-[16px] leading-[24px]">John Doe</h2>
+                            <p class="truncate text-[12px] leading-[18px]">XYZ University</p>
+                        </div>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+    <!-- mobile Header -->
+    <div class="fixed md:hidden bottom-0 left-0 right-0 backdrop-blur-30 z-[1000] bg-[rgba(255,255,255,0.7)]">
+        <div class="flex py-[18px] items-center justify-around">
+            <button type="button" class="w-[26px] h-[26px] rounded-full hover:bg-gray-200 focus:outline-none"><img src="./images/gnb/icon_chat.svg" alt="chat"></button>
+            <button type="button" class="w-[26px] h-[26px] rounded-full hover:bg-gray-200 focus:outline-none"><img src="./images/gnb/icon_notification.svg" alt="notification"></button>
+            <button type="button" class="w-[26px] h-[26px] rounded-full hover:bg-gray-200 focus:outline-none"><img src="./images/gnb/icon_calendar.svg" alt="calendar"></button>
+            <button type="button" class="w-[26px] h-[26px] rounded-full hover:bg-gray-200 focus:outline-none"><img src="./images/gnb/icon_apps.svg" alt="apps"></button>
+
+            <div class="w-[26px] h-[26px] rounded-[26px] bg-gray-300 text-center">A</div>
+        </div>
     </div>
 
-    <%= render :partial => 'shared/dashboard_card' %>
-  <% end %>
-</div>
+    <!-- contents -->
+    <article class="flex gap-[40px] max-w-[1440px] mx-auto min-h-screen md:px-[40px] px-[0px] pt-[20px] bg-gray100">
+        <!-- 왼쪽 대시보드 영역 -->
+        <div class="max-w-[980px]">
+            <section class="grid grid-cols-3 gap-[10px]">
+                <section class="flex flex-col items-center justify-between h-[280px]">
+                    <div class="w-full h-[220px] px-[35px] pt-[30px] shadow-dashboard-shadow2 rounded-tl-[20px] rounded-tr-[20px] rounded-bl-[10px] rounded-br-[10px] bg-[#0000C1]">
+                        <p class="pb-[14px] text-white text-center text-[14px] leading-[50px]">hello message</p>
+                        <div class="flex gap-[10px]">
+                            <div class="w-[100px] h-[100px] rounded-[100px] bg-gray300 text-center">A</div>
+                            <div class="flex justify-center flex-col gap-[4px] text-white"><strong class="block text-[16px] leading-[24px]">UserName</strong><span class="text-[12px] leading-[18px]">student</span></div>
+                        </div>
+                    </div>
+                    <a class="relative w-full h-[60px] text-white text-[16px] leading-[60px] text-center bg-dashboard-gradient shadow-dashboard-shadow rounded-tl-[10px] rounded-tr-[10px] rounded-bl-[20px] rounded-br-[20px]" href="/">
+                        Learning Journal<img src="./images/dashboard/icon_more.svg" alt="more" class="absolute top-[24px] right-[20px]">
+                    </a>
+                </section>
+                <section class="overflow-y-hidden h-[280px] bg-blue rounded-[20px]">
+                    <div class="flex items-center justify-between px-[20px] pt-[14px] pb-[10px]">
+                        <h3 class="text-[#DBE4F2] text-[16px] leading-[20px]">Announcement Board</h3>
+                        <a class="w-[12px] h-[12px]" href="/"><img src="./images/dashboard/icon_more.svg" alt="more"></a>
+                    </div>
+                    <div class="overflow-y-auto h-[236px] px-[10px]">
+                        <ul class="h-full">
+                            <li class="mb-[6px] bg-white rounded-[10px] px-[20px] py-[6px]">
+                                <strong class="line-clamp-2 text-[12px] leading-[18px] text-[#4B4D4E]">[서울] 2024-2학기
+                                    서울캠퍼스 졸업앨범 사진 촬영 안내사진 촬영 안내</strong>
+                                <div class="flex justify-between pt-[6px] items-center">
+                                    <span class="flex gap-[2px]">
+                                        <span class="h-[20px] px-[10px] leading-[20px] text-white text-[10px] bg-[#003EA2] rounded-[12px]">일반</span>
+                                        <span class="w-[23px] h-[20px] leading-[20px] text-center text-white text-[10px] bg-[#0C69FF] rounded-[4px]">S</span>
+                                    </span>
+                                    <span class="text-[10px] leading-[15px] text-[#4B4D4E]">2024.09.19</span>
+                                </div>
+                            </li>
+                            <li class="mb-[6px] bg-white rounded-[10px] px-[20px] py-[6px]">
+                                <strong class="line-clamp-2 text-[12px] leading-[18px] text-[#4B4D4E]">[서울] 2024-2학기
+                                    서울캠퍼스 졸업앨범 사진 촬영 안내</strong>
+                                <div class="flex justify-between pt-[6px] items-center">
+                                    <span class="flex gap-[2px]">
+                                        <span class="h-[20px] px-[10px] leading-[20px] text-white text-[10px] bg-[#003EA2] rounded-[12px]">장학/등록</span>
+                                        <span class="w-[23px] h-[20px] leading-[20px] text-center text-white text-[10px] bg-[#0C69FF] rounded-[4px]">H</span>
+                                    </span>
+                                    <span class="text-[10px] leading-[15px] text-[#4B4D4E]">2024.09.19</span>
+                                </div>
+                            </li>
+                            <li class="mb-[6px] bg-white rounded-[10px] px-[20px] py-[6px]">
+                                <strong class="line-clamp-2 text-[12px] leading-[18px] text-[#4B4D4E]">[서울] 2024-2학기
+                                    서울캠퍼스 졸업앨범 사진 촬영 안내</strong>
+                                <div class="flex justify-between pt-[6px] items-center">
+                                    <span class="flex gap-[2px]">
+                                        <span class="h-[20px] px-[10px] leading-[20px] text-white text-[10px] bg-[#003EA2] rounded-[12px]">장학/등록</span>
+                                        <span class="w-[23px] h-[20px] leading-[20px] text-center text-white text-[10px] bg-[#0C69FF] rounded-[4px]">H</span>
+                                    </span>
+                                    <span class="text-[10px] leading-[15px] text-[#4B4D4E]">2024.09.19</span>
+                                </div>
+                            </li>
+                            <li class="mb-[6px] bg-white rounded-[10px] px-[20px] py-[6px]">
+                                <strong class="line-clamp-2 text-[12px] leading-[18px] text-[#4B4D4E]">[서울] 2024-2학기
+                                    서울캠퍼스 졸업앨범 사진 촬영 안내</strong>
+                                <div class="flex justify-between pt-[6px] items-center">
+                                    <span class="flex gap-[2px]">
+                                        <span class="h-[20px] px-[10px] leading-[20px] text-white text-[10px] bg-[#003EA2] rounded-[12px]">장학/등록</span>
+                                        <span class="w-[23px] h-[20px] leading-[20px] text-center text-white text-[10px] bg-[#0C69FF] rounded-[4px]">H</span>
+                                    </span>
+                                    <span class="text-[10px] leading-[15px] text-[#4B4D4E]">2024.09.19</span>
+                                </div>
+                            </li>
+                            <li class="mb-[6px] bg-white rounded-[10px] px-[20px] py-[6px]">
+                                <strong class="line-clamp-2 text-[12px] leading-[18px] text-[#4B4D4E]">[서울] 2024-2학기
+                                    서울캠퍼스 졸업앨범 사진 촬영 안내</strong>
+                                <div class="flex justify-between pt-[6px] items-center">
+                                    <span class="flex gap-[2px]">
+                                        <span class="h-[20px] px-[10px] leading-[20px] text-white text-[10px] bg-[#003EA2] rounded-[12px]">장학/등록</span>
+                                        <span class="w-[23px] h-[20px] leading-[20px] text-center text-white text-[10px] bg-[#0C69FF] rounded-[4px]">H</span>
+                                    </span>
+                                    <span class="text-[10px] leading-[15px] text-[#4B4D4E]">2024.09.19</span>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </section>
+                <section class="overflow-y-hidden h-[280px] bg-blue rounded-[20px]">
+                    <div class="flex items-center justify-between px-[20px] pt-[14px] pb-[10px]">
+                        <h3 class="text-[#DBE4F2] text-[16px] leading-[20px]">Community Board</h3>
+                        <a class="w-[12px] h-[12px]" href="/"><img src="./images/dashboard/icon_more.svg" alt="more"></a>
+                    </div>
+                    <div class="overflow-y-auto h-[236px] px-[10px]">
+                        <ul class="h-full">
+                            <li class="mb-[6px] bg-white rounded-[10px] px-[20px] py-[6px]">
+                                <strong class="block truncate text-[12px] leading-[18px] text-[#4B4D4E]">한양대 동문 발행물
+                                    배송 금지 요청<span class="text-[#1384D7]">[답변완료]</span></strong>
+                                <div class="flex items-center justify-between pt-[6px]">
+                                    <span class="text-[10px] text-[#7B7E80] flex items-center gap-[4px]"><span class="h-[20px] px-[10px] leading-[20px] text-white text-[10px] bg-[#003EA2] rounded-[12px]">Q&amp;A</span>/익명</span>
+                                    <span class="text-[10px] text-[#7B7E80]">2024/09/04</span>
+                                </div>
+                            </li>
+                            <li class="mb-[6px] bg-white rounded-[10px] px-[20px] py-[6px]">
+                                <strong class="block truncate text-[12px] leading-[18px] text-[#4B4D4E]">한양대</strong>
+                                <div class="flex items-center justify-between pt-[6px]">
+                                    <span class="text-[10px] text-[#7B7E80] flex items-center gap-[4px]"><span class="h-[20px] px-[10px] leading-[20px] text-white text-[10px] bg-[#003EA2] rounded-[12px]">Q&amp;A</span>/익명</span>
+                                    <span class="text-[10px] text-[#7B7E80]">2024/09/04</span>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </section>
+            </section>
+            <section>
+                <div class="text-[26px] font-medium leading-normal text-[#171718] flex align-items gap-[10px]">
+                    <img alt="" loading="lazy" width="32" height="29" decoding="async" data-nimg="1" style="color: transparent;" src="./images/courses/icon_hub.svg"><strong class="pt-[6px]">Teaching Hub</strong>
+                </div>
+                <div class="flex justify-between p-[10px]">
+                    <strong class="flex items-center gap-[10px] text-gray500">Courses<img alt="" loading="lazy" width="12" height="12" decoding="async" data-nimg="1" style="color: transparent;" src="./images/dashboard/icon_more_black.svg"></strong>
+                    <button type="button" class="btn-primary min-w-[80px] flex-grow-0"><img alt="" loading="lazy" width="14" height="14" decoding="async" data-nimg="1" style="color: transparent;" src="./images/dashboard/icon_more_white.svg">Create</button>
+                </div>
+                <div class="flex justify-between p-[10px]">
+                    <strong class="flex items-center gap-[10px] text-gray500">Personal Groups<img alt="" loading="lazy" width="12" height="12" decoding="async" data-nimg="1" style="color: transparent;" src="./images/dashboard/icon_more_black.svg"></strong>
+                    <button type="button" class="btn-primary min-w-[80px] flex-grow-0"><img alt="" loading="lazy" width="14" height="14" decoding="async" data-nimg="1" style="color: transparent;" src="./images/dashboard/icon_more_white.svg">Create</button>
+                </div>
+            </section>
+            <section>
+                <div class="text-[26px] font-medium leading-normal text-[#171718] flex align-items gap-[10px]">
+                    <img alt="" loading="lazy" width="32" height="29" decoding="async" data-nimg="1" style="color: transparent;" src="./images/dashboard/icon_webinar.svg"><strong class="pt-[6px]">Webinars</strong>
+                </div>
+                <ul class="grid grid-cols-4 gap-[10px] pt-[10px]">
+                    <!-- -->
+                    <li class="bg-white rounded-[20px]">
+                        <div class="flex flex-col justify-between h-[200px] bg-gray200 p-[10px] pb-0 rounded-t-[20px]">
+                            <span class="inline-flex">
+                                <div class="bg-blue rounded-[16px] px-[12px] h-[32px] text-white">
+                                    <span class="text-[13px] leading-[30px]">Live</span>
+                                </div>
+                            </span>
+                            <div class="flex justify-between">
+                                <div class="flex gap-[6px]">
+                                    <div class="relative w-[40px] h-[40px] bg-gray-300 rounded-[40px]">
+                                        <img alt="" loading="lazy" decoding="async" data-nimg="fill" style="position: absolute; height: 100%; width: 100%; left: 0; top: 0; right: 0; bottom: 0; color: transparent;" src="./images/common/bg_person.svg">
+                                    </div>
+                                    <div>
+                                        <p class="text-sm text-gray-500">Professor</p>
+                                        <strong class="text-sm font-semibold white">John Doe</strong>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex flex-col gap-[6px] py-[10px] px-[20px]">
+                            <strong class="text-h2">Generative AI for Everyone</strong>
+                            <div class="flex gap-[2px] items-center"><img src="./images/common/icon_date.svg" alt="" class="w-[21px] h-[21px]"><span class="text-[14px] leading-none font-medium text-gray400">Monday &amp;
+                                    Wednesday</span></div>
+                            <div class="flex gap-[2px] items-center"><img src="./images/common/icon_time.svg" alt="" class="w-[21px] h-[21px]"><span class="text-[14px] leading-none font-medium text-gray400">9:00 AM - 10:30
+                                    AM</span></div>
+                        </div>
+                    </li>
+                    <!-- -->
+                    <li class="bg-white rounded-[20px]">
+                        <div class="flex flex-col justify-between h-[200px] bg-gray200 p-[10px] pb-0 rounded-t-[20px]">
+                            <span class="inline-flex">
+                                <div class="bg-blue rounded-[16px] px-[12px] h-[32px] text-white">
+                                    <span class="text-[13px] leading-[30px]">Live</span>
+                                </div>
+                            </span>
+                            <div class="flex justify-between">
+                                <div class="flex gap-[6px]">
+                                    <div class="relative w-[40px] h-[40px] bg-gray-300 rounded-[40px]">
+                                        <img alt="" loading="lazy" decoding="async" data-nimg="fill" style="position: absolute; height: 100%; width: 100%; left: 0; top: 0; right: 0; bottom: 0; color: transparent;" src="./images/common/bg_person.svg">
+                                    </div>
+                                    <div>
+                                        <p class="text-sm text-gray-500">Professor</p>
+                                        <strong class="text-sm font-semibold white">John Doe</strong>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex flex-col gap-[6px] py-[10px] px-[20px]">
+                            <strong class="text-h2">Generative AI for Everyone</strong>
+                            <div class="flex gap-[2px] items-center"><img src="./images/common/icon_date.svg" alt="" class="w-[21px] h-[21px]"><span class="text-[14px] leading-none font-medium text-gray400">Monday &amp;
+                                    Wednesday</span></div>
+                            <div class="flex gap-[2px] items-center"><img src="./images/common/icon_time.svg" alt="" class="w-[21px] h-[21px]"><span class="text-[14px] leading-none font-medium text-gray400">9:00 AM - 10:30
+                                    AM</span></div>
+                        </div>
+                    </li>
+                    <li class="bg-white rounded-[20px]">
+                        <div class="flex flex-col justify-between h-[200px] bg-gray200 p-[10px] pb-0 rounded-t-[20px]">
+                            <span class="inline-flex">
+                                <div class="bg-blue rounded-[16px] px-[12px] h-[32px] text-white">
+                                    <span class="text-[13px] leading-[30px]">Live</span>
+                                </div>
+                            </span>
+                            <div class="flex justify-between">
+                                <div class="flex gap-[6px]">
+                                    <div class="relative w-[40px] h-[40px] bg-gray-300 rounded-[40px]">
+                                        <img alt="" loading="lazy" decoding="async" data-nimg="fill" style="position: absolute; height: 100%; width: 100%; left: 0; top: 0; right: 0; bottom: 0; color: transparent;" src="./images/common/bg_person.svg">
+                                    </div>
+                                    <div>
+                                        <p class="text-sm text-gray-500">Professor</p>
+                                        <strong class="text-sm font-semibold white">John Doe</strong>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex flex-col gap-[6px] py-[10px] px-[20px]">
+                            <strong class="text-h2">Generative AI for Everyone</strong>
+                            <div class="flex gap-[2px] items-center"><img src="./images/common/icon_date.svg" alt="" class="w-[21px] h-[21px]"><span class="text-[14px] leading-none font-medium text-gray400">Monday &amp;
+                                    Wednesday</span></div>
+                            <div class="flex gap-[2px] items-center"><img src="./images/common/icon_time.svg" alt="" class="w-[21px] h-[21px]"><span class="text-[14px] leading-none font-medium text-gray400">9:00 AM - 10:30
+                                    AM</span></div>
+                        </div>
+                    </li>
+                    <li class="bg-white rounded-[20px]">
+                        <div class="flex flex-col justify-between h-[200px] bg-gray200 p-[10px] pb-0 rounded-t-[20px]">
+                            <span class="inline-flex">
+                                <div class="bg-blue rounded-[16px] px-[12px] h-[32px] text-white">
+                                    <span class="text-[13px] leading-[30px]">Live</span>
+                                </div>
+                            </span>
+                            <div class="flex justify-between">
+                                <div class="flex gap-[6px]">
+                                    <div class="relative w-[40px] h-[40px] bg-gray-300 rounded-[40px]">
+                                        <img alt="" loading="lazy" decoding="async" data-nimg="fill" style="position: absolute; height: 100%; width: 100%; left: 0; top: 0; right: 0; bottom: 0; color: transparent;" src="./images/common/bg_person.svg">
+                                    </div>
+                                    <div>
+                                        <p class="text-sm text-gray-500">Professor</p>
+                                        <strong class="text-sm font-semibold white">John Doe</strong>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex flex-col gap-[6px] py-[10px] px-[20px]">
+                            <strong class="text-h2">Generative AI for Everyone</strong>
+                            <div class="flex gap-[2px] items-center"><img src="./images/common/icon_date.svg" alt="" class="w-[21px] h-[21px]"><span class="text-[14px] leading-none font-medium text-gray400">Monday &amp;
+                                    Wednesday</span></div>
+                            <div class="flex gap-[2px] items-center"><img src="./images/common/icon_time.svg" alt="" class="w-[21px] h-[21px]"><span class="text-[14px] leading-none font-medium text-gray400">9:00 AM - 10:30
+                                    AM</span></div>
+                        </div>
+                    </li>
+                </ul>
+            </section>
+
+        </div>
+
+        <!-- 오른쪽 캘린더 영역 -->
+        <div class="hidden lg:block max-w-[340px]">
+            캘린더 영역
+        </div>
+    </article>
+
+    <!-- footer -->
+    <footer class="hidden md:flex items-center justify-center h-[40px] bg-gray100 text-[#4B4D4E] text-[10px] font-medium">
+        Copyright © 2024 HANYANG UNIVERSITY. ALL Rights Reserved.</footer>
+
+
+<div class="glasp-ui-wrapper" id="glasp-ui-wrapper" style="height: 0px; width: 0px; padding: 0px;"><iframe name="glasp-tooltip-iframe" id="glasp-tooltip-iframe" style="display: none;"></iframe><iframe name="glasp-sidebar-iframe" id="glasp-sidebar-iframe" style="display: none !important;width: 0px !important; min-width: 0px !important; max-width: 300px; height: 100%; background: #FFFFFF; resize: horizontal; direction: rtl; margin: auto; position: fixed; top: 0px; right: 0px; left: auto; z-index: 9000000000000000000;border: none !important;"></iframe></div><div id="yt_article_summary_widget_wrapper" class="yt_article_summary_widget_wrapper" style="display: flex; margin: auto; width: fit-content; padding: 0px; border-radius: 100%;">
+        <div id="yt_article_summary_widget" class="yt_article_summary_widget"><svg style="filter: brightness(0.8);" width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <mask id="path-1-outside-1_3606_3145" maskUnits="userSpaceOnUse" x="1" y="1" width="22" height="22" fill="black">
+                  <rect fill="white" x="1" y="1" width="22" height="22"></rect>
+                  <path d="M20.6816 10.1843C20.9588 9.34066 21.0063 8.4399 20.8192 7.57245C20.6321 6.70499 20.217 5.90134 19.6157 5.24216C19.0143 4.58298 18.2478 4.09146 17.393 3.81692C16.5382 3.54238 15.6253 3.49449 14.7459 3.67805C14.1453 3.01747 13.379 2.52468 12.524 2.24931C11.669 1.97394 10.7555 1.92571 9.87559 2.10947C8.99568 2.29324 8.18039 2.70252 7.51181 3.29608C6.84323 3.88965 6.34499 4.64654 6.06725 5.49055C5.18642 5.67292 4.3699 6.08122 3.70003 6.67426C3.03017 7.26731 2.53064 8.02413 2.25182 8.86842C1.97299 9.71271 1.92474 10.6146 2.11192 11.4832C2.2991 12.3517 2.71509 13.1562 3.31795 13.8155C3.09309 14.4899 3.01633 15.2037 3.09278 15.9095C3.16924 16.6154 3.39716 17.2971 3.76139 17.9093C4.30169 18.8351 5.12567 19.568 6.11483 20.0027C7.104 20.4373 8.20738 20.5512 9.26631 20.328C9.74353 20.8568 10.3291 21.2796 10.9844 21.5684C11.6396 21.8571 12.3495 22.0053 13.0672 22.003C14.1516 22.003 15.2081 21.6635 16.0847 21.0334C16.9612 20.4034 17.6125 19.5152 17.9449 18.4968C18.649 18.3539 19.3141 18.0649 19.8962 17.6489C20.4784 17.233 20.9642 16.6997 21.3214 16.0843C21.8585 15.1598 22.0858 14.0915 21.9709 13.032C21.856 11.9724 21.4048 10.9758 20.6816 10.1843ZM13.0798 20.6968C12.191 20.6968 11.3302 20.3894 10.6473 19.828L10.7677 19.7593L14.8029 17.4593C14.9069 17.4047 14.9935 17.3225 15.0528 17.2221C15.1121 17.1216 15.1418 17.0068 15.1386 16.8905V11.2655L16.8427 12.2405C16.8517 12.2441 16.8594 12.2501 16.865 12.2579C16.8706 12.2656 16.8739 12.2748 16.8744 12.2843V16.9343C16.876 17.4289 16.7785 17.9189 16.5875 18.3761C16.3964 18.8333 16.1156 19.2488 15.7611 19.5985C15.4067 19.9482 14.9856 20.2253 14.5222 20.4138C14.0588 20.6023 13.5621 20.6984 13.0608 20.6968H13.0798ZM4.90165 17.2593C4.46164 16.5029 4.3026 15.6189 4.45188 14.7593L4.57224 14.828L8.60749 17.128C8.70379 17.1829 8.81303 17.2118 8.92423 17.2118C9.03543 17.2118 9.14467 17.1829 9.24097 17.128L14.1758 14.3218V16.253C14.1797 16.2608 14.1817 16.2694 14.1817 16.278C14.1817 16.2867 14.1797 16.2953 14.1758 16.303L10.0962 18.628C9.66403 18.8748 9.18685 19.0352 8.69188 19.0999C8.19692 19.1647 7.69387 19.1326 7.21148 19.0055C6.72909 18.8784 6.27681 18.6587 5.88048 18.3591C5.48415 18.0595 5.15154 17.6858 4.90165 17.2593ZM3.83741 8.5843C4.28764 7.82089 4.99655 7.23878 5.83919 6.94055V11.6718C5.83595 11.7857 5.86434 11.8983 5.92128 11.9975C5.97823 12.0966 6.06156 12.1785 6.16227 12.2343L11.0717 15.028L9.36766 16.003C9.34918 16.0092 9.32914 16.0092 9.31065 16.003L5.23106 13.678C4.36041 13.1812 3.72487 12.3642 3.46364 11.4059C3.20242 10.4476 3.33682 9.42624 3.83741 8.56555V8.5843ZM17.8563 11.7968L12.9278 8.9718L14.6319 8.00305C14.6403 7.99741 14.6502 7.99439 14.6604 7.99439C14.6705 7.99439 14.6805 7.99741 14.6889 8.00305L18.7685 10.328C19.3915 10.684 19.8992 11.2072 20.2325 11.8368C20.5659 12.4664 20.7111 13.1764 20.6514 13.8843C20.5916 14.5921 20.3294 15.2687 19.8951 15.8352C19.4608 16.4017 18.8724 16.8349 18.1983 17.0843V12.353C18.1946 12.2391 18.1612 12.1281 18.1013 12.0306C18.0414 11.9332 17.957 11.8527 17.8563 11.7968ZM19.554 9.2968L19.4336 9.2218L15.4047 6.9093C15.3047 6.84846 15.1896 6.81624 15.0721 6.81624C14.9547 6.81624 14.8395 6.84846 14.7396 6.9093L9.8111 9.71555V7.75305C9.8061 7.7445 9.80346 7.7348 9.80346 7.72492C9.80346 7.71505 9.8061 7.70535 9.8111 7.6968L13.897 5.37805C14.5222 5.02257 15.2371 4.85003 15.958 4.88059C16.6789 4.91115 17.3762 5.14356 17.9682 5.55064C18.5601 5.95772 19.0225 6.52265 19.301 7.17939C19.5796 7.83614 19.663 8.55755 19.5413 9.2593L19.554 9.2968ZM8.87989 12.7218L7.1695 11.753C7.15339 11.7405 7.1422 11.7228 7.13782 11.703V7.06555C7.13785 6.35289 7.34371 5.65499 7.73128 5.0536C8.11885 4.45222 8.67209 3.97224 9.32619 3.6699C9.98029 3.36756 10.7082 3.25537 11.4246 3.34647C12.141 3.43757 12.8162 3.7282 13.3712 4.1843L13.2636 4.25305L9.21563 6.55305C9.11158 6.60765 9.02504 6.68981 8.96573 6.79029C8.90642 6.89076 8.87669 7.00557 8.87989 7.1218V12.7218ZM9.80476 10.753L11.9966 9.50305L14.1948 10.753V13.253L11.9966 14.503L9.79843 13.253L9.80476 10.753Z"></path>
+                  </mask>
+                  <path d="M20.6816 10.1843C20.9588 9.34066 21.0063 8.4399 20.8192 7.57245C20.6321 6.70499 20.217 5.90134 19.6157 5.24216C19.0143 4.58298 18.2478 4.09146 17.393 3.81692C16.5382 3.54238 15.6253 3.49449 14.7459 3.67805C14.1453 3.01747 13.379 2.52468 12.524 2.24931C11.669 1.97394 10.7555 1.92571 9.87559 2.10947C8.99568 2.29324 8.18039 2.70252 7.51181 3.29608C6.84323 3.88965 6.34499 4.64654 6.06725 5.49055C5.18642 5.67292 4.3699 6.08122 3.70003 6.67426C3.03017 7.26731 2.53064 8.02413 2.25182 8.86842C1.97299 9.71271 1.92474 10.6146 2.11192 11.4832C2.2991 12.3517 2.71509 13.1562 3.31795 13.8155C3.09309 14.4899 3.01633 15.2037 3.09278 15.9095C3.16924 16.6154 3.39716 17.2971 3.76139 17.9093C4.30169 18.8351 5.12567 19.568 6.11483 20.0027C7.104 20.4373 8.20738 20.5512 9.26631 20.328C9.74353 20.8568 10.3291 21.2796 10.9844 21.5684C11.6396 21.8571 12.3495 22.0053 13.0672 22.003C14.1516 22.003 15.2081 21.6635 16.0847 21.0334C16.9612 20.4034 17.6125 19.5152 17.9449 18.4968C18.649 18.3539 19.3141 18.0649 19.8962 17.6489C20.4784 17.233 20.9642 16.6997 21.3214 16.0843C21.8585 15.1598 22.0858 14.0915 21.9709 13.032C21.856 11.9724 21.4048 10.9758 20.6816 10.1843ZM13.0798 20.6968C12.191 20.6968 11.3302 20.3894 10.6473 19.828L10.7677 19.7593L14.8029 17.4593C14.9069 17.4047 14.9935 17.3225 15.0528 17.2221C15.1121 17.1216 15.1418 17.0068 15.1386 16.8905V11.2655L16.8427 12.2405C16.8517 12.2441 16.8594 12.2501 16.865 12.2579C16.8706 12.2656 16.8739 12.2748 16.8744 12.2843V16.9343C16.876 17.4289 16.7785 17.9189 16.5875 18.3761C16.3964 18.8333 16.1156 19.2488 15.7611 19.5985C15.4067 19.9482 14.9856 20.2253 14.5222 20.4138C14.0588 20.6023 13.5621 20.6984 13.0608 20.6968H13.0798ZM4.90165 17.2593C4.46164 16.5029 4.3026 15.6189 4.45188 14.7593L4.57224 14.828L8.60749 17.128C8.70379 17.1829 8.81303 17.2118 8.92423 17.2118C9.03543 17.2118 9.14467 17.1829 9.24097 17.128L14.1758 14.3218V16.253C14.1797 16.2608 14.1817 16.2694 14.1817 16.278C14.1817 16.2867 14.1797 16.2953 14.1758 16.303L10.0962 18.628C9.66403 18.8748 9.18685 19.0352 8.69188 19.0999C8.19692 19.1647 7.69387 19.1326 7.21148 19.0055C6.72909 18.8784 6.27681 18.6587 5.88048 18.3591C5.48415 18.0595 5.15154 17.6858 4.90165 17.2593ZM3.83741 8.5843C4.28764 7.82089 4.99655 7.23878 5.83919 6.94055V11.6718C5.83595 11.7857 5.86434 11.8983 5.92128 11.9975C5.97823 12.0966 6.06156 12.1785 6.16227 12.2343L11.0717 15.028L9.36766 16.003C9.34918 16.0092 9.32914 16.0092 9.31065 16.003L5.23106 13.678C4.36041 13.1812 3.72487 12.3642 3.46364 11.4059C3.20242 10.4476 3.33682 9.42624 3.83741 8.56555V8.5843ZM17.8563 11.7968L12.9278 8.9718L14.6319 8.00305C14.6403 7.99741 14.6502 7.99439 14.6604 7.99439C14.6705 7.99439 14.6805 7.99741 14.6889 8.00305L18.7685 10.328C19.3915 10.684 19.8992 11.2072 20.2325 11.8368C20.5659 12.4664 20.7111 13.1764 20.6514 13.8843C20.5916 14.5921 20.3294 15.2687 19.8951 15.8352C19.4608 16.4017 18.8724 16.8349 18.1983 17.0843V12.353C18.1946 12.2391 18.1612 12.1281 18.1013 12.0306C18.0414 11.9332 17.957 11.8527 17.8563 11.7968ZM19.554 9.2968L19.4336 9.2218L15.4047 6.9093C15.3047 6.84846 15.1896 6.81624 15.0721 6.81624C14.9547 6.81624 14.8395 6.84846 14.7396 6.9093L9.8111 9.71555V7.75305C9.8061 7.7445 9.80346 7.7348 9.80346 7.72492C9.80346 7.71505 9.8061 7.70535 9.8111 7.6968L13.897 5.37805C14.5222 5.02257 15.2371 4.85003 15.958 4.88059C16.6789 4.91115 17.3762 5.14356 17.9682 5.55064C18.5601 5.95772 19.0225 6.52265 19.301 7.17939C19.5796 7.83614 19.663 8.55755 19.5413 9.2593L19.554 9.2968ZM8.87989 12.7218L7.1695 11.753C7.15339 11.7405 7.1422 11.7228 7.13782 11.703V7.06555C7.13785 6.35289 7.34371 5.65499 7.73128 5.0536C8.11885 4.45222 8.67209 3.97224 9.32619 3.6699C9.98029 3.36756 10.7082 3.25537 11.4246 3.34647C12.141 3.43757 12.8162 3.7282 13.3712 4.1843L13.2636 4.25305L9.21563 6.55305C9.11158 6.60765 9.02504 6.68981 8.96573 6.79029C8.90642 6.89076 8.87669 7.00557 8.87989 7.1218V12.7218ZM9.80476 10.753L11.9966 9.50305L14.1948 10.753V13.253L11.9966 14.503L9.79843 13.253L9.80476 10.753Z" fill="#828282"></path>
+                  <path d="M20.6816 10.1843C20.9588 9.34066 21.0063 8.4399 20.8192 7.57245C20.6321 6.70499 20.217 5.90134 19.6157 5.24216C19.0143 4.58298 18.2478 4.09146 17.393 3.81692C16.5382 3.54238 15.6253 3.49449 14.7459 3.67805C14.1453 3.01747 13.379 2.52468 12.524 2.24931C11.669 1.97394 10.7555 1.92571 9.87559 2.10947C8.99568 2.29324 8.18039 2.70252 7.51181 3.29608C6.84323 3.88965 6.34499 4.64654 6.06725 5.49055C5.18642 5.67292 4.3699 6.08122 3.70003 6.67426C3.03017 7.26731 2.53064 8.02413 2.25182 8.86842C1.97299 9.71271 1.92474 10.6146 2.11192 11.4832C2.2991 12.3517 2.71509 13.1562 3.31795 13.8155C3.09309 14.4899 3.01633 15.2037 3.09278 15.9095C3.16924 16.6154 3.39716 17.2971 3.76139 17.9093C4.30169 18.8351 5.12567 19.568 6.11483 20.0027C7.104 20.4373 8.20738 20.5512 9.26631 20.328C9.74353 20.8568 10.3291 21.2796 10.9844 21.5684C11.6396 21.8571 12.3495 22.0053 13.0672 22.003C14.1516 22.003 15.2081 21.6635 16.0847 21.0334C16.9612 20.4034 17.6125 19.5152 17.9449 18.4968C18.649 18.3539 19.3141 18.0649 19.8962 17.6489C20.4784 17.233 20.9642 16.6997 21.3214 16.0843C21.8585 15.1598 22.0858 14.0915 21.9709 13.032C21.856 11.9724 21.4048 10.9758 20.6816 10.1843ZM13.0798 20.6968C12.191 20.6968 11.3302 20.3894 10.6473 19.828L10.7677 19.7593L14.8029 17.4593C14.9069 17.4047 14.9935 17.3225 15.0528 17.2221C15.1121 17.1216 15.1418 17.0068 15.1386 16.8905V11.2655L16.8427 12.2405C16.8517 12.2441 16.8594 12.2501 16.865 12.2579C16.8706 12.2656 16.8739 12.2748 16.8744 12.2843V16.9343C16.876 17.4289 16.7785 17.9189 16.5875 18.3761C16.3964 18.8333 16.1156 19.2488 15.7611 19.5985C15.4067 19.9482 14.9856 20.2253 14.5222 20.4138C14.0588 20.6023 13.5621 20.6984 13.0608 20.6968H13.0798ZM4.90165 17.2593C4.46164 16.5029 4.3026 15.6189 4.45188 14.7593L4.57224 14.828L8.60749 17.128C8.70379 17.1829 8.81303 17.2118 8.92423 17.2118C9.03543 17.2118 9.14467 17.1829 9.24097 17.128L14.1758 14.3218V16.253C14.1797 16.2608 14.1817 16.2694 14.1817 16.278C14.1817 16.2867 14.1797 16.2953 14.1758 16.303L10.0962 18.628C9.66403 18.8748 9.18685 19.0352 8.69188 19.0999C8.19692 19.1647 7.69387 19.1326 7.21148 19.0055C6.72909 18.8784 6.27681 18.6587 5.88048 18.3591C5.48415 18.0595 5.15154 17.6858 4.90165 17.2593ZM3.83741 8.5843C4.28764 7.82089 4.99655 7.23878 5.83919 6.94055V11.6718C5.83595 11.7857 5.86434 11.8983 5.92128 11.9975C5.97823 12.0966 6.06156 12.1785 6.16227 12.2343L11.0717 15.028L9.36766 16.003C9.34918 16.0092 9.32914 16.0092 9.31065 16.003L5.23106 13.678C4.36041 13.1812 3.72487 12.3642 3.46364 11.4059C3.20242 10.4476 3.33682 9.42624 3.83741 8.56555V8.5843ZM17.8563 11.7968L12.9278 8.9718L14.6319 8.00305C14.6403 7.99741 14.6502 7.99439 14.6604 7.99439C14.6705 7.99439 14.6805 7.99741 14.6889 8.00305L18.7685 10.328C19.3915 10.684 19.8992 11.2072 20.2325 11.8368C20.5659 12.4664 20.7111 13.1764 20.6514 13.8843C20.5916 14.5921 20.3294 15.2687 19.8951 15.8352C19.4608 16.4017 18.8724 16.8349 18.1983 17.0843V12.353C18.1946 12.2391 18.1612 12.1281 18.1013 12.0306C18.0414 11.9332 17.957 11.8527 17.8563 11.7968ZM19.554 9.2968L19.4336 9.2218L15.4047 6.9093C15.3047 6.84846 15.1896 6.81624 15.0721 6.81624C14.9547 6.81624 14.8395 6.84846 14.7396 6.9093L9.8111 9.71555V7.75305C9.8061 7.7445 9.80346 7.7348 9.80346 7.72492C9.80346 7.71505 9.8061 7.70535 9.8111 7.6968L13.897 5.37805C14.5222 5.02257 15.2371 4.85003 15.958 4.88059C16.6789 4.91115 17.3762 5.14356 17.9682 5.55064C18.5601 5.95772 19.0225 6.52265 19.301 7.17939C19.5796 7.83614 19.663 8.55755 19.5413 9.2593L19.554 9.2968ZM8.87989 12.7218L7.1695 11.753C7.15339 11.7405 7.1422 11.7228 7.13782 11.703V7.06555C7.13785 6.35289 7.34371 5.65499 7.73128 5.0536C8.11885 4.45222 8.67209 3.97224 9.32619 3.6699C9.98029 3.36756 10.7082 3.25537 11.4246 3.34647C12.141 3.43757 12.8162 3.7282 13.3712 4.1843L13.2636 4.25305L9.21563 6.55305C9.11158 6.60765 9.02504 6.68981 8.96573 6.79029C8.90642 6.89076 8.87669 7.00557 8.87989 7.1218V12.7218ZM9.80476 10.753L11.9966 9.50305L14.1948 10.753V13.253L11.9966 14.503L9.79843 13.253L9.80476 10.753Z" stroke="#828282" stroke-width="0.2" mask="url(#path-1-outside-1_3606_3145)"></path>
+              </svg></div>
+        <div id="yt_article_summary_close_button" class="yt_article_summary_close_button">×</div>
+    </div></body></html>
