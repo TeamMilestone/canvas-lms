@@ -590,7 +590,7 @@ class UsersController < ApplicationController
       @cards_prefetch_observed_param = @selected_observed_user&.id
     end
 
-    if k5_user?
+    if k5_user? || true
       # things needed only for k5 dashboard
       # hide the grades tab if the user does not have active enrollments or if all enrolled courses have the tab hidden
       active_courses = Course.where(id: @current_user.enrollments.active_by_date.select(:course_id), homeroom_course: false)
@@ -600,6 +600,7 @@ class UsersController < ApplicationController
                                   .select(&:enable_as_k5_account?)
                                   .map { |a| { asset_string: a.asset_string, name: a.name } }
 
+      @active_courses = active_courses
       js_env({
                HIDE_K5_DASHBOARD_GRADES_TAB: active_courses.empty? || active_courses.all? { |c| c.tab_hidden?(Course::TAB_GRADES) },
                SELECTED_CONTEXT_CODES: calendar_contexts.is_a?(Array) ? calendar_contexts : [],
