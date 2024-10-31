@@ -63,23 +63,25 @@
         <div class="flex items-center justify-between px-[40px] py-[10px] max-w-[1440px] mx-auto">
             <div class="flex items-center">
                 <h1>
-                    <a class="block" href="/"><img src="./images/logo.svg" alt="한양대학교" class="block w-[100px] h-[34px] md:w-[140px] md:h-[53px]"></a>
+                    <a class="block" href="/"><img src="/images/logo.svg" alt="한양대학교" class="block w-[100px] h-[34px] md:w-[140px] md:h-[53px]"></a>
                 </h1>
                 <div class="hidden lg:flex items-center w-[130px] h-[34px] rounded-[17px] px-[11px] bg-[rgba(172,176,179,0.2)] ml-[60px]">
-                    <button class="shrink-0 w-[26px]"><img src="./images/gnb/icon_search.svg" alt="search" class="w-[26px] h-[26px]"></button>
+                    <button class="shrink-0 w-[26px]"><img src="/images/gnb/icon_search.svg" alt="search" class="w-[26px] h-[26px]"></button>
                     <input type="text" class="w-full ml-[4px] focus:outline-none bg-transparent placeholder-gray400" placeholder="Search">
                 </div>
             </div>
             <div class="hidden md:flex justify-between gap-[40px] items-center">
                 <div class="flex gap-[30px]">
                     <div class="relative flex items-center">
-                        <button class="rounded-full hover:bg-gray-200 focus:outline-none"><img src="./images/gnb/icon_chat.svg" alt="chat"></button>
-
+                        <!--  TODO: Messages -->
+                                <a id="global_nav_conversations_link" href="/conversations" class="ic-app-header__menu-list-link">
+                        <button class="rounded-full hover:bg-gray-200 focus:outline-none"><img src="/images/gnb/icon_chat.svg" alt="chat"></button>
+</a>
                         <!-- messages -->
                         <div class="hidden absolute top-[40px] right-0">
                             <div class="bg-white rounded-[20px] shadow-gnb-shadow p-[10px]">
                                 <div class="flex justify-between items-center pb-[10px] px-[10px]">
-                                    <strong class="text-[16px] leading-[20px] text-gray-600">Messages</strong><img src="./images/gnb/icon_more.svg" alt="" class="w-[12px] h-[12px]">
+                                    <strong class="text-[16px] leading-[20px] text-gray-600">Messages</strong><img src="/images/gnb/icon_more.svg" alt="" class="w-[12px] h-[12px]">
                                 </div>
 
                                 <div class="w-[340px]">
@@ -96,7 +98,7 @@
                                     <div class="h-[328px] overflow-auto">
                                         <div class="px-[10px] py-[6px] rounded-[10px]">
                                             <div class="flex justify-between items-center">
-                                                <span class="flex items-center gap-[4px]"><img src="./images/apps/icon_slack.svg" alt="" class="w-[12px]"><span class="text-[10px] leading-[15px] text-gray600">slack</span></span>
+                                                <span class="flex items-center gap-[4px]"><img src="/images/apps/icon_slack.svg" alt="" class="w-[12px]"><span class="text-[10px] leading-[15px] text-gray600">slack</span></span>
                                                 <span class="text-[10px] text-gray500">3:40PM</span>
                                             </div>
                                             <div class="pt-[4px] pl-[16px]">
@@ -108,7 +110,7 @@
                                         </div>
                                         <div class="px-[10px] py-[6px] rounded-[10px]">
                                             <div class="flex justify-between items-center">
-                                                <span class="flex items-center gap-[4px]"><img src="./images/apps/icon_zoom.svg" alt="" class="w-[12px]"><span class="text-[10px] leading-[15px] text-gray600">zoom</span></span>
+                                                <span class="flex items-center gap-[4px]"><img src="/images/apps/icon_zoom.svg" alt="" class="w-[12px]"><span class="text-[10px] leading-[15px] text-gray600">zoom</span></span>
                                                 <span class="text-[10px] text-gray500">3:40PM</span>
                                             </div>
                                             <div class="pt-[4px] pl-[16px]">
@@ -128,7 +130,7 @@
                                         </div>
                                         <div class="px-[10px] py-[6px] rounded-[10px]">
                                             <div class="flex justify-between items-center">
-                                                <span class="flex items-center gap-[4px]"><img src="./images/apps/icon_slack.svg" alt="" class="w-[12px]"><span class="text-[10px] leading-[15px] text-gray600">slack</span></span>
+                                                <span class="flex items-center gap-[4px]"><img src="/images/apps/icon_slack.svg" alt="" class="w-[12px]"><span class="text-[10px] leading-[15px] text-gray600">slack</span></span>
                                                 <span class="text-[10px] text-gray500">3:40PM</span>
                                             </div>
                                             <div class="pt-[4px] pl-[16px]">
@@ -140,7 +142,7 @@
                                         </div>
                                         <div class="px-[10px] py-[6px] rounded-[10px]">
                                             <div class="flex justify-between items-center">
-                                                <span class="flex items-center gap-[4px]"><img src="./images/apps/icon_zoom.svg" alt="" class="w-[12px]"><span class="text-[10px] leading-[15px] text-gray600">zoom</span></span>
+                                                <span class="flex items-center gap-[4px]"><img src="/images/apps/icon_zoom.svg" alt="" class="w-[12px]"><span class="text-[10px] leading-[15px] text-gray600">zoom</span></span>
                                                 <span class="text-[10px] text-gray500">3:40PM</span>
                                             </div>
                                             <div class="pt-[4px] pl-[16px]">
@@ -165,15 +167,16 @@
                         <!-- // messages -->
                     </div>
                     <div class="relative flex items-center">
+                        <!-- Notification -->
                         <button class="rounded-full hover:bg-gray-200 focus:outline-none">
-                            <img src="./images/gnb/icon_notification.svg" alt="notification">
+                            <img src="/images/gnb/icon_notification.svg" alt="notification">
                         </button>
 
                         <!-- Notifications -->
                         <div class="hidden absolute top-[40px] right-0">
                             <div class="bg-white rounded-[20px] shadow-gnb-shadow p-[10px]">
                                 <div class="flex justify-between items-center pb-[10px] px-[10px]">
-                                    <strong class="text-[16px] leading-[20px] text-gray-600">Notifications</strong><img src="./images/gnb/icon_more.svg" alt="" class="w-[12px] h-[12px]">
+                                    <strong class="text-[16px] leading-[20px] text-gray-600">Notifications</strong><img src="/images/gnb/icon_more.svg" alt="" class="w-[12px] h-[12px]">
                                 </div>
 
                                 <div class="w-[340px]">
@@ -190,7 +193,7 @@
                                     <div class="h-[326px] overflow-auto">
                                         <div class="p-[10px] pt-[6px] rounded-[10px]">
                                             <div class="flex gap-[6px] items-start">
-                                                <img src="./images/apps/icon_notification.svg" alt="" class="w-[34px]">
+                                                <img src="/images/apps/icon_notification.svg" alt="" class="w-[34px]">
                                                 <div class="flex flex-col flex-grow">
                                                     <div class="flex justify-between items-center">
                                                         <strong class="truncate max-w-[200px] text-[12px] leading-[18px] text-gray600 font-medium">group
@@ -213,13 +216,16 @@
                         <!--// Notifications -->
                     </div>
                     <div class="relative flex items-center">
-                        <button class="w-[26px] h-[26px] rounded-full hover:bg-gray-200 focus:outline-none"><img src="./images/gnb/icon_calendar.svg" alt="calendar"></button>
+                        <!-- TODO: calendar -->
+                        <a id="global_nav_calendar_link" href="/calendar" class="ic-app-header__menu-list-link">
+                        <button class="w-[26px] h-[26px] rounded-full hover:bg-gray-200 focus:outline-none"><img src="/images/gnb/icon_calendar.svg" alt="calendar"></button>
+                        </a>
 
                         <!-- Calendar -->
                         <div class="hidden absolute top-[40px] right-0">
                             <div class="bg-white rounded-[20px] shadow-gnb-shadow p-[10px]">
                                 <div class="flex justify-between items-center pb-[10px] px-[10px]"><strong class="text-[16px] leading-[20px] text-gray-600">September 24-30,
-                                        2024</strong><img src="./images/gnb/icon_more.svg" alt="" class="w-[12px] h-[12px]">
+                                        2024</strong><img src="/images/gnb/icon_more.svg" alt="" class="w-[12px] h-[12px]">
                                 </div>
                                 <div class="w-[320px]">
                                     <div class="py-[16px] px-[10px]">
@@ -237,7 +243,7 @@
                                     </div>
                                     <div class="h-[252px] overflow-auto">
                                         <div class="flex items-start border-gray-200 rounded-[10px] p-[10px]">
-                                            <span class="flex flex-col items-center pr-[10px]"><img src="./images/lesson/icon_discussion.svg" alt="discussion" class="w-[40px]"><span class="pt-[2px] capitalize text-[#6767FF] text-[8px]">discussion</span></span>
+                                            <span class="flex flex-col items-center pr-[10px]"><img src="/images/lesson/icon_discussion.svg" alt="discussion" class="w-[40px]"><span class="pt-[2px] capitalize text-[#6767FF] text-[8px]">discussion</span></span>
                                             <div class="flex flex-col flex-grow pr-[6px]">
                                                 <div class="flex justify-between pb-[6px] items-center">
                                                     <strong class="truncate max-w-[170px] text-[12px] leading-[16px] text-gray600">Graphic
@@ -245,16 +251,16 @@
                                                     <span class="rounded-[16px] bg-gray400 text-white font-medium text-[8px] leading-[16px] px-[8px]">Course</span>
                                                 </div>
                                                 <div class="flex flex-col gap-[6px]">
-                                                    <div class="flex gap-[2px] items-center"><img src="./images/common/icon_time.svg" alt="" class="w-[12px] h-[12px]"><span class="text-[12px] leading-none font-medium text-gray400">Sep
+                                                    <div class="flex gap-[2px] items-center"><img src="/images/common/icon_time.svg" alt="" class="w-[12px] h-[12px]"><span class="text-[12px] leading-none font-medium text-gray400">Sep
                                                             25, 11:00AM</span></div>
-                                                    <div class="flex gap-[2px] items-center"><img src="./images/common/icon_location.svg" alt="" class="w-[12px] h-[12px]"><span class="text-[12px] leading-none font-medium text-gray400">Design
+                                                    <div class="flex gap-[2px] items-center"><img src="/images/common/icon_location.svg" alt="" class="w-[12px] h-[12px]"><span class="text-[12px] leading-none font-medium text-gray400">Design
                                                             Studio B</span></div>
                                                 </div>
                                             </div>
-                                            <button type="button" class="w-[12px]"><img src="./images/dashboard/icon_calendar_alert_close.svg" alt="close"></button>
+                                            <button type="button" class="w-[12px]"><img src="/images/dashboard/icon_calendar_alert_close.svg" alt="close"></button>
                                         </div>
                                         <div class="flex items-start border-gray-200 rounded-[10px] p-[10px]">
-                                            <span class="flex flex-col items-center pr-[10px]"><img src="./images/lesson/icon_project.svg" alt="project" class="w-[40px]"><span class="pt-[2px] capitalize text-[#00BA60] text-[8px]">project</span></span>
+                                            <span class="flex flex-col items-center pr-[10px]"><img src="/images/lesson/icon_project.svg" alt="project" class="w-[40px]"><span class="pt-[2px] capitalize text-[#00BA60] text-[8px]">project</span></span>
                                             <div class="flex flex-col flex-grow pr-[6px]">
                                                 <div class="flex justify-between pb-[6px] items-center">
                                                     <strong class="truncate max-w-[170px] text-[12px] leading-[16px] text-gray600">Graphic
@@ -262,16 +268,16 @@
                                                     <span class="rounded-[16px] bg-gray400 text-white font-medium text-[8px] leading-[16px] px-[8px]">Personal</span>
                                                 </div>
                                                 <div class="flex flex-col gap-[6px]">
-                                                    <div class="flex gap-[2px] items-center"><img src="./images/common/icon_time.svg" alt="" class="w-[12px] h-[12px]"><span class="text-[12px] leading-none font-medium text-gray400">Sep
+                                                    <div class="flex gap-[2px] items-center"><img src="/images/common/icon_time.svg" alt="" class="w-[12px] h-[12px]"><span class="text-[12px] leading-none font-medium text-gray400">Sep
                                                             25, 11:00AM</span></div>
-                                                    <div class="flex gap-[2px] items-center"><img src="./images/common/icon_location.svg" alt="" class="w-[12px] h-[12px]"><span class="text-[12px] leading-none font-medium text-gray400">Design
+                                                    <div class="flex gap-[2px] items-center"><img src="/images/common/icon_location.svg" alt="" class="w-[12px] h-[12px]"><span class="text-[12px] leading-none font-medium text-gray400">Design
                                                             Studio B</span></div>
                                                 </div>
                                             </div>
-                                            <button type="button" class="w-[12px]"><img src="./images/dashboard/icon_calendar_alert_close.svg" alt="close"></button>
+                                            <button type="button" class="w-[12px]"><img src="/images/dashboard/icon_calendar_alert_close.svg" alt="close"></button>
                                         </div>
                                         <div class="flex items-start border-gray-200 rounded-[10px] p-[10px]">
-                                            <span class="flex flex-col items-center pr-[10px]"><img src="./images/lesson/icon_feedback.svg" alt="feedback" class="w-[40px]"><span class="pt-[2px] capitalize text-[#FF8A00] text-[8px]">feedback</span></span>
+                                            <span class="flex flex-col items-center pr-[10px]"><img src="/images/lesson/icon_feedback.svg" alt="feedback" class="w-[40px]"><span class="pt-[2px] capitalize text-[#FF8A00] text-[8px]">feedback</span></span>
                                             <div class="flex flex-col flex-grow pr-[6px]">
                                                 <div class="flex justify-between pb-[6px] items-center">
                                                     <strong class="truncate max-w-[170px] text-[12px] leading-[16px] text-gray600">Graphic
@@ -281,11 +287,11 @@
                                                 <div class="flex flex-col gap-[6px]">
                                                     <div class="flex gap-[2px] items-center"><span class="text-[12px] leading-none font-medium text-gray400">User
                                                             Experience Reserch</span></div>
-                                                    <div class="flex gap-[2px] items-center"><img src="./images/common/icon_check.svg" alt="" class="w-[12px] h-[12px]"><span class="text-[12px] leading-none font-medium text-gray400">8
+                                                    <div class="flex gap-[2px] items-center"><img src="/images/common/icon_check.svg" alt="" class="w-[12px] h-[12px]"><span class="text-[12px] leading-none font-medium text-gray400">8
                                                             out of 100</span></div>
                                                 </div>
                                             </div>
-                                            <button type="button" class="w-[12px]"><img src="./images/dashboard/icon_calendar_alert_close.svg" alt="close"></button>
+                                            <button type="button" class="w-[12px]"><img src="/images/dashboard/icon_calendar_alert_close.svg" alt="close"></button>
                                         </div>
                                     </div>
                                 </div>
@@ -294,61 +300,62 @@
                         <!--// Calendar -->
                     </div>
                     <div class="relative flex items-center">
-                        <button class="rounded-full hover:bg-gray-200 focus:outline-none"><img src="./images/gnb/icon_apps.svg" alt="menu"></button>
+                        <!-- TODO: apps -->
+                        <button class="rounded-full hover:bg-gray-200 focus:outline-none"><img src="/images/gnb/icon_apps.svg" alt="menu"></button>
 
                         <!-- menu -->
                         <div class="hidden absolute top-[40px] right-0">
                             <div class="bg-white rounded-[20px] shadow-gnb-shadow p-[10px]">
-                                <div class="flex justify-between items-center pb-[10px] px-[10px]"><strong class="text-[16px] leading-[20px] text-gray-600">Shortcut</strong><img src="./images/gnb/icon_more.svg" alt="" class="w-[12px] h-[12px]"></div>
+                                <div class="flex justify-between items-center pb-[10px] px-[10px]"><strong class="text-[16px] leading-[20px] text-gray-600">Shortcut</strong><img src="/images/gnb/icon_more.svg" alt="" class="w-[12px] h-[12px]"></div>
                                 <div class="w-[240px] py-[6px]">
                                     <ul class="grid grid-cols-3 gap-y-[16px]">
                                         <li>
-                                            <a target="_blank" class="flex flex-col text-center gap-[4px]" href=""><img src="./images/apps/icon_courses.svg" alt="" class="w-[34px] mx-auto"><span class="font-medium text-gray500 text-[10px] truncate">Courses</span></a>
+                                            <a target="_blank" class="flex flex-col text-center gap-[4px]" href=""><img src="/images/apps/icon_courses.svg" alt="" class="w-[34px] mx-auto"><span class="font-medium text-gray500 text-[10px] truncate">Courses</span></a>
                                         </li>
                                         <li>
                                             <a target="_blank" class="flex flex-col text-center gap-[4px]" href="">
-                                                <img src="./images/apps/icon_personal_group.svg" alt="" class="w-[34px] mx-auto"><span class="font-medium text-gray500 text-[10px] truncate">Personal
+                                                <img src="/images/apps/icon_personal_group.svg" alt="" class="w-[34px] mx-auto"><span class="font-medium text-gray500 text-[10px] truncate">Personal
                                                     Group</span>
                                             </a>
                                         </li>
                                         <li>
                                             <a target="_blank" class="flex flex-col text-center gap-[4px]" href="">
-                                                <img src="./images/apps/icon_minerva_uni.svg" alt="" class="w-[34px] mx-auto"><span class="font-medium text-gray500 text-[10px] truncate">Minerva
+                                                <img src="/images/apps/icon_minerva_uni.svg" alt="" class="w-[34px] mx-auto"><span class="font-medium text-gray500 text-[10px] truncate">Minerva
                                                     Uni</span>
                                             </a>
                                         </li>
                                         <li>
                                             <a target="_blank" class="flex flex-col text-center gap-[4px]" href="">
-                                                <img src="./images/apps/icon_meeting_hub.svg" alt="" class="w-[34px] mx-auto"><span class="font-medium text-gray500 text-[10px] truncate">Meeting
+                                                <img src="/images/apps/icon_meeting_hub.svg" alt="" class="w-[34px] mx-auto"><span class="font-medium text-gray500 text-[10px] truncate">Meeting
                                                     Hub</span>
                                             </a>
                                         </li>
                                         <li>
-                                            <a target="_blank" class="flex flex-col text-center gap-[4px]" href=""><img src="./images/apps/icon_webinar.svg" alt="" class="w-[34px] mx-auto"><span class="font-medium text-gray500 text-[10px] truncate">Webinar</span></a>
+                                            <a target="_blank" class="flex flex-col text-center gap-[4px]" href=""><img src="/images/apps/icon_webinar.svg" alt="" class="w-[34px] mx-auto"><span class="font-medium text-gray500 text-[10px] truncate">Webinar</span></a>
                                         </li>
                                         <li>
-                                            <a target="_blank" class="flex flex-col text-center gap-[4px]" href=""><img src="./images/apps/icon_calendar.svg" alt="" class="w-[34px] mx-auto"><span class="font-medium text-gray500 text-[10px] truncate">Calendar</span></a>
+                                            <a target="_blank" class="flex flex-col text-center gap-[4px]" href=""><img src="/images/apps/icon_calendar.svg" alt="" class="w-[34px] mx-auto"><span class="font-medium text-gray500 text-[10px] truncate">Calendar</span></a>
                                         </li>
                                         <li>
-                                            <a target="_blank" class="flex flex-col text-center gap-[4px]" href=""><img src="./images/apps/icon_panopto.svg" alt="" class="w-[34px] mx-auto"><span class="font-medium text-gray500 text-[10px] truncate">Panopto</span></a>
+                                            <a target="_blank" class="flex flex-col text-center gap-[4px]" href=""><img src="/images/apps/icon_panopto.svg" alt="" class="w-[34px] mx-auto"><span class="font-medium text-gray500 text-[10px] truncate">Panopto</span></a>
                                         </li>
                                         <li>
-                                            <a target="_blank" class="flex flex-col text-center gap-[4px]" href=""><img src="./images/apps/icon_slack.svg" alt="" class="w-[34px] mx-auto"><span class="font-medium text-gray500 text-[10px] truncate">Slack</span></a>
+                                            <a target="_blank" class="flex flex-col text-center gap-[4px]" href=""><img src="/images/apps/icon_slack.svg" alt="" class="w-[34px] mx-auto"><span class="font-medium text-gray500 text-[10px] truncate">Slack</span></a>
                                         </li>
                                         <li>
-                                            <a target="_blank" class="flex flex-col text-center gap-[4px]" href=""><img src="./images/apps/icon_zoom.svg" alt="" class="w-[34px] mx-auto"><span class="font-medium text-gray500 text-[10px] truncate">Zoom</span></a>
+                                            <a target="_blank" class="flex flex-col text-center gap-[4px]" href=""><img src="/images/apps/icon_zoom.svg" alt="" class="w-[34px] mx-auto"><span class="font-medium text-gray500 text-[10px] truncate">Zoom</span></a>
                                         </li>
                                         <li>
                                             <a target="_blank" class="flex flex-col text-center gap-[4px]" href="">
-                                                <img src="./images/apps/icon_learning_journal.svg" alt="" class="w-[34px] mx-auto"><span class="font-medium text-gray500 text-[10px] truncate">Learning
+                                                <img src="/images/apps/icon_learning_journal.svg" alt="" class="w-[34px] mx-auto"><span class="font-medium text-gray500 text-[10px] truncate">Learning
                                                     Journal</span>
                                             </a>
                                         </li>
                                         <li>
-                                            <a target="_blank" class="flex flex-col text-center gap-[4px]" href=""><img src="./images/apps/icon_help.svg" alt="" class="w-[34px] mx-auto"><span class="font-medium text-gray500 text-[10px] truncate">Help</span></a>
+                                            <a target="_blank" class="flex flex-col text-center gap-[4px]" href=""><img src="/images/apps/icon_help.svg" alt="" class="w-[34px] mx-auto"><span class="font-medium text-gray500 text-[10px] truncate">Help</span></a>
                                         </li>
                                         <li>
-                                            <a target="_blank" class="flex flex-col text-center gap-[4px]" href=""><img src="./images/apps/icon_setting.svg" alt="" class="w-[34px] mx-auto"><span class="font-medium text-gray500 text-[10px] truncate">Setting</span></a>
+                                            <a target="_blank" class="flex flex-col text-center gap-[4px]" href=""><img src="/images/apps/icon_setting.svg" alt="" class="w-[34px] mx-auto"><span class="font-medium text-gray500 text-[10px] truncate">Setting</span></a>
                                         </li>
                                     </ul>
                                 </div>
@@ -356,9 +363,6 @@
                         </div>
 
                         <!-- //menu -->
-                    </div>
-                    <div class="relative flex items-center">
-                        <button class="w-[26px] h-[26px] rounded-full hover:bg-gray-200 focus:outline-none"><img src="./images/gnb/icon_support.svg" alt="support"></button>
                     </div>
                 </div>
                 <div>
@@ -376,10 +380,10 @@
     <!-- mobile Header -->
     <div class="fixed md:hidden bottom-0 left-0 right-0 backdrop-blur-30 z-[1000] bg-[rgba(255,255,255,0.7)]">
         <div class="flex py-[18px] items-center justify-around">
-            <button type="button" class="w-[26px] h-[26px] rounded-full hover:bg-gray-200 focus:outline-none"><img src="./images/gnb/icon_chat.svg" alt="chat"></button>
-            <button type="button" class="w-[26px] h-[26px] rounded-full hover:bg-gray-200 focus:outline-none"><img src="./images/gnb/icon_notification.svg" alt="notification"></button>
-            <button type="button" class="w-[26px] h-[26px] rounded-full hover:bg-gray-200 focus:outline-none"><img src="./images/gnb/icon_calendar.svg" alt="calendar"></button>
-            <button type="button" class="w-[26px] h-[26px] rounded-full hover:bg-gray-200 focus:outline-none"><img src="./images/gnb/icon_apps.svg" alt="apps"></button>
+            <button type="button" class="w-[26px] h-[26px] rounded-full hover:bg-gray-200 focus:outline-none"><img src="/images/gnb/icon_chat.svg" alt="chat"></button>
+            <button type="button" class="w-[26px] h-[26px] rounded-full hover:bg-gray-200 focus:outline-none"><img src="/images/gnb/icon_notification.svg" alt="notification"></button>
+            <button type="button" class="w-[26px] h-[26px] rounded-full hover:bg-gray-200 focus:outline-none"><img src="/images/gnb/icon_calendar.svg" alt="calendar"></button>
+            <button type="button" class="w-[26px] h-[26px] rounded-full hover:bg-gray-200 focus:outline-none"><img src="/images/gnb/icon_apps.svg" alt="apps"></button>
 
             <div class="w-[26px] h-[26px] rounded-[26px] bg-gray-300 text-center">A</div>
         </div>
@@ -399,13 +403,13 @@
                         </div>
                     </div>
                     <a class="relative w-full h-[60px] text-white text-[16px] leading-[60px] text-center bg-dashboard-gradient shadow-dashboard-shadow rounded-tl-[10px] rounded-tr-[10px] rounded-bl-[20px] rounded-br-[20px]" href="/">
-                        Learning Journal<img src="./images/dashboard/icon_more.svg" alt="more" class="absolute top-[24px] right-[20px]">
+                        Learning Journal<img src="/images/dashboard/icon_more.svg" alt="more" class="absolute top-[24px] right-[20px]">
                     </a>
                 </section>
                 <section class="overflow-y-hidden h-[280px] bg-blue rounded-[20px]">
                     <div class="flex items-center justify-between px-[20px] pt-[14px] pb-[10px]">
                         <h3 class="text-[#DBE4F2] text-[16px] leading-[20px]">Announcement Board</h3>
-                        <a class="w-[12px] h-[12px]" href="/"><img src="./images/dashboard/icon_more.svg" alt="more"></a>
+                        <a class="w-[12px] h-[12px]" href="/"><img src="/images/dashboard/icon_more.svg" alt="more"></a>
                     </div>
                     <div class="overflow-y-auto h-[236px] px-[10px]">
                         <ul class="h-full">
@@ -470,7 +474,7 @@
                 <section class="overflow-y-hidden h-[280px] bg-blue rounded-[20px]">
                     <div class="flex items-center justify-between px-[20px] pt-[14px] pb-[10px]">
                         <h3 class="text-[#DBE4F2] text-[16px] leading-[20px]">Community Board</h3>
-                        <a class="w-[12px] h-[12px]" href="/"><img src="./images/dashboard/icon_more.svg" alt="more"></a>
+                        <a class="w-[12px] h-[12px]" href="/"><img src="/images/dashboard/icon_more.svg" alt="more"></a>
                     </div>
                     <div class="overflow-y-auto h-[236px] px-[10px]">
                         <ul class="h-full">
@@ -495,20 +499,15 @@
             </section>
             <section>
                 <div class="text-[26px] font-medium leading-normal text-[#171718] flex align-items gap-[10px]">
-                    <img alt="" loading="lazy" width="32" height="29" decoding="async" data-nimg="1" style="color: transparent;" src="./images/courses/icon_hub.svg"><strong class="pt-[6px]">Teaching Hub</strong>
+                    <img alt="" loading="lazy" width="32" height="29" decoding="async" data-nimg="1" style="color: transparent;" src="/images/courses/icon_hub.svg"><strong class="pt-[6px]">Teaching Hub</strong>
                 </div>
                 <div class="flex justify-between p-[10px]">
-                    <strong class="flex items-center gap-[10px] text-gray500">Courses<img alt="" loading="lazy" width="12" height="12" decoding="async" data-nimg="1" style="color: transparent;" src="./images/dashboard/icon_more_black.svg"></strong>
-                    <button type="button" class="btn-primary min-w-[80px] flex-grow-0"><img alt="" loading="lazy" width="14" height="14" decoding="async" data-nimg="1" style="color: transparent;" src="./images/dashboard/icon_more_white.svg">Create</button>
-                </div>
-                <div class="flex justify-between p-[10px]">
-                    <strong class="flex items-center gap-[10px] text-gray500">Personal Groups<img alt="" loading="lazy" width="12" height="12" decoding="async" data-nimg="1" style="color: transparent;" src="./images/dashboard/icon_more_black.svg"></strong>
-                    <button type="button" class="btn-primary min-w-[80px] flex-grow-0"><img alt="" loading="lazy" width="14" height="14" decoding="async" data-nimg="1" style="color: transparent;" src="./images/dashboard/icon_more_white.svg">Create</button>
-                </div>
-            </section>
-            <section>
-                <div class="text-[26px] font-medium leading-normal text-[#171718] flex align-items gap-[10px]">
-                    <img alt="" loading="lazy" width="32" height="29" decoding="async" data-nimg="1" style="color: transparent;" src="./images/dashboard/icon_webinar.svg"><strong class="pt-[6px]">Webinars</strong>
+                    <a href='/courses'>
+                      <strong class="flex items-center gap-[10px] text-gray500">Courses<img alt="" loading="lazy" width="12" height="12" decoding="async" data-nimg="1" style="color: transparent;" src="/images/dashboard/icon_more_black.svg"></strong>
+                    </a>
+                    <a href='/courses'>
+                      <button type="button" class="btn-primary min-w-[80px] flex-grow-0"><img alt="" loading="lazy" width="14" height="14" decoding="async" data-nimg="1" style="color: transparent;" src="/images/dashboard/icon_more_white.svg">Create</button>
+                    </a>
                 </div>
                 <ul class="grid grid-cols-4 gap-[10px] pt-[10px]">
                     <!-- -->
@@ -516,14 +515,11 @@
                       <li class="bg-white rounded-[20px]">
                           <div class="flex flex-col justify-between h-[200px] bg-gray200 p-[10px] pb-0 rounded-t-[20px]">
                               <span class="inline-flex">
-                                  <div class="bg-blue rounded-[16px] px-[12px] h-[32px] text-white">
-                                      <span class="text-[13px] leading-[30px]">Live</span>
-                                  </div>
                               </span>
                               <div class="flex justify-between">
                                   <div class="flex gap-[6px]">
                                       <div class="relative w-[40px] h-[40px] bg-gray-300 rounded-[40px]">
-                                          <img alt="" loading="lazy" decoding="async" data-nimg="fill" style="position: absolute; height: 100%; width: 100%; left: 0; top: 0; right: 0; bottom: 0; color: transparent;" src="./images/common/bg_person.svg">
+                                          <img alt="" loading="lazy" decoding="async" data-nimg="fill" style="position: absolute; height: 100%; width: 100%; left: 0; top: 0; right: 0; bottom: 0; color: transparent;" src="/images/common/bg_person.svg">
                                       </div>
                                       <div>
                                           <p class="text-sm text-gray-500">Professor</p>
@@ -534,9 +530,9 @@
                           </div>
                           <div class="flex flex-col gap-[6px] py-[10px] px-[20px]">
                               <strong class="text-h2"><%= active_course.name %></strong>
-                              <div class="flex gap-[2px] items-center"><img src="./images/common/icon_date.svg" alt="" class="w-[21px] h-[21px]"><span class="text-[14px] leading-none font-medium text-gray400">Monday &amp;
+                              <div class="flex gap-[2px] items-center"><img src="/images/common/icon_date.svg" alt="" class="w-[21px] h-[21px]"><span class="text-[14px] leading-none font-medium text-gray400">Monday &amp;
                                       Wednesday</span></div>
-                              <div class="flex gap-[2px] items-center"><img src="./images/common/icon_time.svg" alt="" class="w-[21px] h-[21px]"><span class="text-[14px] leading-none font-medium text-gray400">9:00 AM - 10:30
+                              <div class="flex gap-[2px] items-center"><img src="/images/common/icon_time.svg" alt="" class="w-[21px] h-[21px]"><span class="text-[14px] leading-none font-medium text-gray400">9:00 AM - 10:30
                                       AM</span></div>
                           </div>
                       </li>
