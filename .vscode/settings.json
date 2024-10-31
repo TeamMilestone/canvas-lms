@@ -11,4 +11,19 @@
   "cSpell.words": [
     "urlsafe"
   ],
+  "emeraldwalk.runonsave": {
+    "commands": [
+        {
+            "match": ".sass",
+            "isAsync": true,
+            "cmd": "bundle exec rake css:compile && echo 'css compiled!'"
+        },
+        {
+            "match": ".scss",
+            "isAsync": true,
+            "cmd": "bundle exec rake css:compile && echo 'css compiled!'"
+        }
+    ]
+  }
+
 }
